@@ -3,6 +3,14 @@
     "name": "simple-bible",
     "slug": "simple-bible",
     "version": "1.0.0",
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/8a1e3b3c-80d0-452f-87fc-916f1895f716",
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
+    },
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "simplebible",
