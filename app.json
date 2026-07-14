@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "simple-bible",
+    "name": "Simple Bible",
     "slug": "simple-bible",
     "version": "1.0.0",
     "runtimeVersion": {
@@ -17,7 +17,11 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.dustinkelley.simple-bible"
+      "bundleIdentifier": "com.dustinkelley.simple-bible",
+      "supportsTablet": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -39,10 +43,8 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#208AEF",
-          "android": {
-            "image": "./assets/images/splash-icon.png",
-            "imageWidth": 76
-          }
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 100
         }
       ]
     ],

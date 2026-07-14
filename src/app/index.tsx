@@ -1,10 +1,26 @@
-import { Bookmark, BookOpen, Headphones, Share2 } from 'lucide-react-native';
-import { Pressable, ScrollView, View } from 'react-native';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { Bookmark, BookmarkCheck, BookOpen, Share2 } from 'lucide-react-native';
+import { useCallback, useMemo, useState } from 'react';
+import { Pressable, ScrollView, Share, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
+import { chapterLabel, refLabel, TRANSLATION_ABBREV, verseOfTheDay } from '@/lib/bible';
+import { getLastRead, getSavedVerses, saveVerse, type LastRead, type SavedVerse } from '@/lib/store';
+
+const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+function greeting(hour: number) {
+  if (hour < 12) return 'Good morning';
+  if (hour < 18) return 'Good afternoon';
+  return 'Good evening';
+}
 
 function SectionLabel({ children, className }: { children: string; className?: string }) {
   return (
@@ -16,14 +32,48 @@ function SectionLabel({ children, className }: { children: string; className?: s
 }
 
 export default function HomeScreen() {
+  const router = useRouter();
+  const [lastRead, setLastReadState] = useState<LastRead | null>(null);
+  const [latestSaved, setLatestSaved] = useState<SavedVerse | null>(null);
+
+  const now = useMemo(() => new Date(), []);
+  const daily = useMemo(() => verseOfTheDay(now), [now]);
+  const dailyIsSaved =
+    latestSaved !== null &&
+    latestSaved.book === daily.book &&
+    latestSaved.chapter === daily.chapter &&
+    latestSaved.verse === daily.verse;
+
+  useFocusEffect(
+    useCallback(() => {
+      getLastRead().then(setLastReadState);
+      getSavedVerses().then((saved) => setLatestSaved(saved[0] ?? null));
+    }, [])
+  );
+
+  const continueTarget = lastRead ?? { book: 42, chapter: 1 }; // John 1
+
+  const onSaveDaily = async () => {
+    const saved = await saveVerse({ ...daily, savedAt: now.getTime() });
+    setLatestSaved(saved[0] ?? null);
+  };
+
+  const onShareDaily = () => {
+    Share.share({
+      message: `"${daily.text}" — ${refLabel(daily)} (${TRANSLATION_ABBREV})`,
+    });
+  };
+
   return (
     <SafeAreaView edges={['top']} className="bg-background flex-1">
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerClassName="px-5 pb-6 pt-3">
-        <Text className="text-muted-foreground text-[13px] font-semibold">Tuesday, June 11</Text>
+        <Text className="text-muted-foreground text-[13px] font-semibold">
+          {`${WEEKDAYS[now.getDay()]}, ${MONTHS[now.getMonth()]} ${now.getDate()}`}
+        </Text>
         <Text className="text-foreground mt-1 text-3xl font-extrabold tracking-tight">
-          Good morning
+          {greeting(now.getHours())}
         </Text>
 
         {/* Verse of the Day */}
@@ -32,49 +82,70 @@ export default function HomeScreen() {
             Verse of the Day
           </Text>
           <Text className="text-background dark:text-foreground mt-3.5 text-[22px] font-semibold leading-8">
-            Those who wait are given new strength; they rise on steady wings, and are not weary.
+            {daily.text}
           </Text>
-          <Text className="text-muted-foreground mt-4 text-[13px] font-semibold">Isaiah 40:31</Text>
+          <Text className="text-muted-foreground mt-4 text-[13px] font-semibold">
+            {refLabel(daily)}
+          </Text>
 
           <View className="mt-5 flex-row gap-2.5">
-            <Button className="h-[46px] flex-1 gap-2 rounded-[13px]">
-              <Icon as={Bookmark} size={17} />
-              <Text className="font-bold">Save</Text>
+            <Button onPress={onSaveDaily} className="h-[46px] flex-1 gap-2 rounded-[13px]">
+              <Icon as={dailyIsSaved ? BookmarkCheck : Bookmark} size={17} />
+              <Text className="font-bold">{dailyIsSaved ? 'Saved' : 'Save'}</Text>
             </Button>
-            <Pressable className="dark:bg-border h-[46px] w-[46px] items-center justify-center rounded-[13px] bg-white/10">
+            <Pressable
+              onPress={onShareDaily}
+              accessibilityLabel="Share verse"
+              className="dark:bg-border h-[46px] w-[46px] items-center justify-center rounded-[13px] bg-white/10">
               <Icon as={Share2} size={18} className="text-background dark:text-foreground" />
-            </Pressable>
-            <Pressable className="dark:bg-border h-[46px] w-[46px] items-center justify-center rounded-[13px] bg-white/10">
-              <Icon as={Headphones} size={18} className="text-background dark:text-foreground" />
             </Pressable>
           </View>
         </View>
 
         {/* Continue reading */}
         <SectionLabel className="mb-3 mt-7">Continue reading</SectionLabel>
-        <Pressable className="bg-secondary dark:border-border flex-row items-center gap-4 rounded-[18px] p-[18px] dark:border">
+        <Pressable
+          onPress={() =>
+            router.navigate({
+              pathname: '/read',
+              params: { book: String(continueTarget.book), chapter: String(continueTarget.chapter) },
+            })
+          }
+          className="bg-secondary dark:border-border flex-row items-center gap-4 rounded-[18px] p-[18px] dark:border">
           <View className="bg-accent h-[50px] w-[50px] items-center justify-center rounded-[14px]">
             <Icon as={BookOpen} size={24} className="text-primary" strokeWidth={1.8} />
           </View>
           <View className="flex-1">
-            <Text className="text-foreground text-[17px] font-bold">John 1</Text>
-            <Text className="text-muted-foreground mt-0.5 text-[13px] font-medium">
-              8 min left · 60%
+            <Text className="text-foreground text-[17px] font-bold">
+              {chapterLabel(continueTarget.book, continueTarget.chapter)}
             </Text>
-            <View className="bg-border mt-2.5 h-[5px] overflow-hidden rounded-full">
-              <View className="bg-primary h-full w-[60%] rounded-full" />
-            </View>
+            <Text className="text-muted-foreground mt-0.5 text-[13px] font-medium">
+              {lastRead ? 'Pick up where you left off' : 'Start reading'}
+            </Text>
           </View>
         </Pressable>
 
         {/* Recently saved */}
-        <SectionLabel className="mb-3 mt-7">Recently saved</SectionLabel>
-        <View className="bg-secondary dark:border-border rounded-[18px] p-[18px] dark:border">
-          <Text className="text-foreground/80 text-base font-medium leading-6">
-            Be still, and let the day arrive; what is held in peace is never truly lost.
-          </Text>
-          <Text className="text-primary mt-2.5 text-xs font-semibold">Psalm 46:10</Text>
-        </View>
+        {latestSaved ? (
+          <>
+            <SectionLabel className="mb-3 mt-7">Recently saved</SectionLabel>
+            <Pressable
+              onPress={() =>
+                router.navigate({
+                  pathname: '/read',
+                  params: { book: String(latestSaved.book), chapter: String(latestSaved.chapter) },
+                })
+              }
+              className="bg-secondary dark:border-border rounded-[18px] p-[18px] dark:border">
+              <Text className="text-foreground/80 text-base font-medium leading-6">
+                {latestSaved.text}
+              </Text>
+              <Text className="text-primary mt-2.5 text-xs font-semibold">
+                {refLabel(latestSaved)}
+              </Text>
+            </Pressable>
+          </>
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );

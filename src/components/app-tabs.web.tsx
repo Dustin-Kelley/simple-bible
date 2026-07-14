@@ -1,5 +1,5 @@
 import { TabList, TabSlot, TabTrigger, Tabs } from 'expo-router/ui';
-import { BookOpen, House, Search, User } from 'lucide-react-native';
+import { BookOpen, House, Search, Settings } from 'lucide-react-native';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -24,8 +24,8 @@ export default function AppTabs() {
           <TabTrigger name="search" href="/search" asChild>
             <TabButton icon={Search} label="Search" />
           </TabTrigger>
-          <TabTrigger name="me" href="/me" asChild>
-            <TabButton icon={User} label="Me" />
+          <TabTrigger name="settings" href="/settings" asChild>
+            <TabButton icon={Settings} label="Settings" />
           </TabTrigger>
         </View>
       </TabList>
