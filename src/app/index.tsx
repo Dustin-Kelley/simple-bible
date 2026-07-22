@@ -1,14 +1,23 @@
+import { VerseOfTheDay } from '@youversion/platform-react-native-expo-ui';
+import type { VerseOfTheDayShareData } from '@youversion/platform-react-ui';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { Bookmark, BookmarkCheck, BookOpen, Share2 } from 'lucide-react-native';
+import { BookOpen } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, Share, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
-import { chapterLabel, refLabel, TRANSLATION_ABBREV, verseOfTheDay } from '@/lib/bible';
-import { getLastRead, getSavedVerses, saveVerse, type LastRead, type SavedVerse } from '@/lib/store';
+import { chapterLabel, parseLabelReference, parseReference } from '@/lib/reference';
+import {
+  DEFAULT_LAST_READ,
+  getLastRead,
+  getSavedVerses,
+  saveVerse,
+  type LastRead,
+  type SavedVerse,
+} from '@/lib/store';
+import { DEFAULT_VERSION_ID } from '@/lib/youversion';
 
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const MONTHS = [
@@ -31,37 +40,51 @@ function SectionLabel({ children, className }: { children: string; className?: s
   );
 }
 
+function navigateToRead(
+  router: ReturnType<typeof useRouter>,
+  target: { book: string; chapter: string; versionId?: number }
+) {
+  router.navigate({
+    pathname: '/read',
+    params: {
+      book: target.book,
+      chapter: target.chapter,
+      ...(target.versionId != null ? { versionId: String(target.versionId) } : {}),
+    },
+  });
+}
+
 export default function HomeScreen() {
   const router = useRouter();
   const [lastRead, setLastReadState] = useState<LastRead | null>(null);
-  const [latestSaved, setLatestSaved] = useState<SavedVerse | null>(null);
+  const [saved, setSaved] = useState<SavedVerse[]>([]);
 
   const now = useMemo(() => new Date(), []);
-  const daily = useMemo(() => verseOfTheDay(now), [now]);
-  const dailyIsSaved =
-    latestSaved !== null &&
-    latestSaved.book === daily.book &&
-    latestSaved.chapter === daily.chapter &&
-    latestSaved.verse === daily.verse;
 
   useFocusEffect(
     useCallback(() => {
       getLastRead().then(setLastReadState);
-      getSavedVerses().then((saved) => setLatestSaved(saved[0] ?? null));
+      getSavedVerses().then(setSaved);
     }, [])
   );
 
-  const continueTarget = lastRead ?? { book: 42, chapter: 1 }; // John 1
+  const continueTarget = lastRead ?? DEFAULT_LAST_READ;
+  const latestSaved = saved[0] ?? null;
 
-  const onSaveDaily = async () => {
-    const saved = await saveVerse({ ...daily, savedAt: now.getTime() });
-    setLatestSaved(saved[0] ?? null);
-  };
+  const onShareDaily = async (data: VerseOfTheDayShareData) => {
+    await Share.share({ message: data.text });
 
-  const onShareDaily = () => {
-    Share.share({
-      message: `"${daily.text}" — ${refLabel(daily)} (${TRANSLATION_ABBREV})`,
+    const parsed = parseLabelReference(data.reference);
+    if (!parsed) return;
+    const next = await saveVerse({
+      reference: parsed.verse
+        ? `${parsed.book}.${parsed.chapter}.${parsed.verse}`
+        : `${parsed.book}.${parsed.chapter}`,
+      versionId: DEFAULT_VERSION_ID,
+      label: parsed.label,
+      savedAt: Date.now(),
     });
+    setSaved(next);
   };
 
   return (
@@ -76,41 +99,20 @@ export default function HomeScreen() {
           {greeting(now.getHours())}
         </Text>
 
-        {/* Verse of the Day */}
-        <View className="bg-foreground dark:bg-card dark:border-border mt-6 rounded-3xl p-6 dark:border">
-          <Text className="text-primary text-[11px] font-bold uppercase tracking-[0.14em]">
-            Verse of the Day
-          </Text>
-          <Text className="text-background dark:text-foreground mt-3.5 text-[22px] font-semibold leading-8">
-            {daily.text}
-          </Text>
-          <Text className="text-muted-foreground mt-4 text-[13px] font-semibold">
-            {refLabel(daily)}
-          </Text>
-
-          <View className="mt-5 flex-row gap-2.5">
-            <Button onPress={onSaveDaily} className="h-[46px] flex-1 gap-2 rounded-[13px]">
-              <Icon as={dailyIsSaved ? BookmarkCheck : Bookmark} size={17} />
-              <Text className="font-bold">{dailyIsSaved ? 'Saved' : 'Save'}</Text>
-            </Button>
-            <Pressable
-              onPress={onShareDaily}
-              accessibilityLabel="Share verse"
-              className="dark:bg-border h-[46px] w-[46px] items-center justify-center rounded-[13px] bg-white/10">
-              <Icon as={Share2} size={18} className="text-background dark:text-foreground" />
-            </Pressable>
-          </View>
+        <View className="mt-6 overflow-hidden rounded-3xl">
+          <VerseOfTheDay
+            versionId={DEFAULT_VERSION_ID}
+            theme="system"
+            size="lg"
+            showShareButton
+            showBibleAppAttribution
+            onShare={onShareDaily}
+          />
         </View>
 
-        {/* Continue reading */}
         <SectionLabel className="mb-3 mt-7">Continue reading</SectionLabel>
         <Pressable
-          onPress={() =>
-            router.navigate({
-              pathname: '/read',
-              params: { book: String(continueTarget.book), chapter: String(continueTarget.chapter) },
-            })
-          }
+          onPress={() => navigateToRead(router, continueTarget)}
           className="bg-secondary dark:border-border flex-row items-center gap-4 rounded-[18px] p-[18px] dark:border">
           <View className="bg-accent h-[50px] w-[50px] items-center justify-center rounded-[14px]">
             <Icon as={BookOpen} size={24} className="text-primary" strokeWidth={1.8} />
@@ -125,25 +127,33 @@ export default function HomeScreen() {
           </View>
         </Pressable>
 
-        {/* Recently saved */}
         {latestSaved ? (
           <>
             <SectionLabel className="mb-3 mt-7">Recently saved</SectionLabel>
-            <Pressable
-              onPress={() =>
-                router.navigate({
-                  pathname: '/read',
-                  params: { book: String(latestSaved.book), chapter: String(latestSaved.chapter) },
-                })
-              }
-              className="bg-secondary dark:border-border rounded-[18px] p-[18px] dark:border">
-              <Text className="text-foreground/80 text-base font-medium leading-6">
-                {latestSaved.text}
-              </Text>
-              <Text className="text-primary mt-2.5 text-xs font-semibold">
-                {refLabel(latestSaved)}
-              </Text>
-            </Pressable>
+            {saved.slice(0, 5).map((item) => {
+              const parsed =
+                parseReference(item.reference) ??
+                parseLabelReference(item.label) ??
+                parseLabelReference(item.reference);
+              return (
+                <Pressable
+                  key={`${item.reference}-${item.versionId}-${item.savedAt}`}
+                  onPress={() => {
+                    if (!parsed) return;
+                    navigateToRead(router, {
+                      book: parsed.book,
+                      chapter: parsed.chapter,
+                      versionId: item.versionId,
+                    });
+                  }}
+                  className="bg-secondary dark:border-border mb-2.5 rounded-[18px] px-[18px] py-4 dark:border">
+                  <Text className="text-primary text-xs font-semibold">{item.label}</Text>
+                  <Text className="text-muted-foreground mt-1 text-[13px] font-medium">
+                    Open in reader
+                  </Text>
+                </Pressable>
+              );
+            })}
           </>
         ) : null}
       </ScrollView>

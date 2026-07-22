@@ -22,7 +22,7 @@ export default function AppTabs() {
             <TabButton icon={BookOpen} label="Read" />
           </TabTrigger>
           <TabTrigger name="search" href="/search" asChild>
-            <TabButton icon={Search} label="Search" />
+            <TabButton icon={Search} label="Find" />
           </TabTrigger>
           <TabTrigger name="settings" href="/settings" asChild>
             <TabButton icon={Settings} label="Settings" />

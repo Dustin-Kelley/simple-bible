@@ -21,7 +21,7 @@ export default function AppTabs() {
 
       <NativeTabs.Trigger name="search">
         <NativeTabs.Trigger.Icon sf="magnifyingglass" />
-        <NativeTabs.Trigger.Label>Search</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>Find</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="settings">
