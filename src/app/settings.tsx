@@ -1,14 +1,10 @@
+import { useYVAuth } from '@youversion/platform-react-native-expo-core';
+import { YouVersionAuthButton } from '@youversion/platform-react-native-expo-ui';
 import Constants from 'expo-constants';
-import { BookOpen, Type } from 'lucide-react-native';
-import type { LucideIcon } from 'lucide-react-native';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
-import { TRANSLATION_ABBREV, TRANSLATION_NAME } from '@/lib/bible';
-import { TEXT_SIZE_LABEL, useSettings } from '@/lib/settings';
-import { cn } from '@/lib/utils';
 
 function SectionLabel({ children, className }: { children: string; className?: string }) {
   return (
@@ -19,49 +15,32 @@ function SectionLabel({ children, className }: { children: string; className?: s
   );
 }
 
-function MiniIcon({ as }: { as: LucideIcon }) {
-  return (
-    <View className="bg-accent h-8 w-8 items-center justify-center rounded-[9px]">
-      <Icon as={as} size={17} className="text-primary" strokeWidth={1.9} />
-    </View>
-  );
-}
+function AccountSection() {
+  const { isAuthenticated, userInfo, isLoading } = useYVAuth();
 
-function Row({
-  icon,
-  label,
-  value,
-  onPress,
-  isLast,
-}: {
-  icon: LucideIcon;
-  label: string;
-  value: string;
-  onPress?: () => void;
-  isLast?: boolean;
-}) {
-  const content = (
-    <View
-      className={cn(
-        'flex-row items-center gap-3.5 px-4 py-[15px]',
-        !isLast && 'border-border border-b'
-      )}>
-      <MiniIcon as={icon} />
-      <Text className="text-foreground flex-1 text-base font-medium">{label}</Text>
-      <Text
-        className={cn(
-          'text-sm font-medium',
-          onPress ? 'text-primary font-semibold' : 'text-muted-foreground'
-        )}>
-        {value}
-      </Text>
-    </View>
+  return (
+    <>
+      <SectionLabel className="mb-2.5 mt-7">YouVersion account</SectionLabel>
+      <View className="bg-secondary rounded-[20px] px-4 py-[15px]">
+        <Text className="text-foreground text-base font-medium">
+          {isLoading
+            ? 'Checking sign-in…'
+            : isAuthenticated
+              ? userInfo?.name ?? userInfo?.email ?? 'Signed in'
+              : 'Not signed in'}
+        </Text>
+        <Text className="text-muted-foreground mt-1 text-[13px] leading-5">
+          Sign in to sync YouVersion features in the reader. Reading works without an account.
+        </Text>
+        <View className="mt-4 items-start">
+          <YouVersionAuthButton mode="auto" size="default" radius="rounded" />
+        </View>
+      </View>
+    </>
   );
-  return onPress ? <Pressable onPress={onPress}>{content}</Pressable> : content;
 }
 
 export default function SettingsScreen() {
-  const { textSize, cycleTextSize } = useSettings();
   const version = Constants.expoConfig?.version ?? '1.0.0';
 
   return (
@@ -69,14 +48,16 @@ export default function SettingsScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="px-5 pb-6 pt-3">
         <Text className="text-foreground text-3xl font-extrabold tracking-tight">Settings</Text>
 
-        {/* Reading */}
-        <SectionLabel className="mb-2.5 mt-7">Reading</SectionLabel>
-        <View className="bg-secondary overflow-hidden rounded-[20px]">
-          <Row icon={Type} label="Text Size" value={TEXT_SIZE_LABEL[textSize]} onPress={cycleTextSize} />
-          <Row icon={BookOpen} label="Translation" value={TRANSLATION_ABBREV} isLast />
+        <AccountSection />
+
+        <SectionLabel className="mb-2.5 mt-6">Reading</SectionLabel>
+        <View className="bg-secondary rounded-[20px] px-4 py-[15px]">
+          <Text className="text-foreground text-base font-medium">Text size &amp; version</Text>
+          <Text className="text-muted-foreground mt-1 text-[13px] leading-5">
+            Use the reader toolbar to change font size, spacing, and Bible version.
+          </Text>
         </View>
 
-        {/* About */}
         <SectionLabel className="mb-2.5 mt-6">About</SectionLabel>
         <View className="bg-secondary rounded-[20px] px-4 py-[15px]">
           <View className="flex-row items-center justify-between">
@@ -86,8 +67,8 @@ export default function SettingsScreen() {
         </View>
 
         <Text className="text-muted-foreground mt-7 px-2 text-center text-[13px] leading-5">
-          Scripture quotations are from the {TRANSLATION_NAME} ({TRANSLATION_ABBREV}), which is in
-          the public domain.
+          Scripture content is provided by YouVersion. Version-specific copyright attributions appear
+          in the reader where required.
         </Text>
       </ScrollView>
     </SafeAreaView>

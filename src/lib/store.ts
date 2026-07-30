@@ -1,16 +1,24 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import type { VerseRef } from '@/lib/bible';
+import { DEFAULT_BOOK, DEFAULT_CHAPTER, DEFAULT_VERSION_ID } from '@/lib/youversion';
 
 const KEYS = {
-  lastRead: 'simple-bible/last-read',
-  savedVerses: 'simple-bible/saved-verses',
-  textSize: 'simple-bible/text-size',
+  lastRead: 'simple-bible/v2/last-read',
+  savedVerses: 'simple-bible/v2/saved-verses',
 } as const;
 
-export type LastRead = { book: number; chapter: number };
+export type LastRead = {
+  book: string;
+  chapter: string;
+  versionId: number;
+};
 
-export type SavedVerse = VerseRef & { text: string; savedAt: number };
+export type SavedVerse = {
+  reference: string;
+  versionId: number;
+  label: string;
+  savedAt: number;
+};
 
 async function readJson<T>(key: string): Promise<T | null> {
   try {
@@ -40,7 +48,7 @@ export async function getSavedVerses(): Promise<SavedVerse[]> {
 export async function saveVerse(verse: SavedVerse): Promise<SavedVerse[]> {
   const existing = await getSavedVerses();
   const withoutDupe = existing.filter(
-    (v) => !(v.book === verse.book && v.chapter === verse.chapter && v.verse === verse.verse)
+    (v) => !(v.reference === verse.reference && v.versionId === verse.versionId)
   );
   const next = [verse, ...withoutDupe].slice(0, 100);
   try {
@@ -51,17 +59,8 @@ export async function saveVerse(verse: SavedVerse): Promise<SavedVerse[]> {
   return next;
 }
 
-export type TextSize = 'small' | 'default' | 'large';
-
-export async function getTextSize(): Promise<TextSize> {
-  const value = await readJson<TextSize>(KEYS.textSize);
-  return value === 'small' || value === 'large' ? value : 'default';
-}
-
-export async function setTextSize(value: TextSize) {
-  try {
-    await AsyncStorage.setItem(KEYS.textSize, JSON.stringify(value));
-  } catch {
-    // non-fatal
-  }
-}
+export const DEFAULT_LAST_READ: LastRead = {
+  book: DEFAULT_BOOK,
+  chapter: DEFAULT_CHAPTER,
+  versionId: DEFAULT_VERSION_ID,
+};
