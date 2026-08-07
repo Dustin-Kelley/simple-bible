@@ -5,7 +5,10 @@ import { DEFAULT_BOOK, DEFAULT_CHAPTER, DEFAULT_VERSION_ID } from '@/lib/youvers
 const KEYS = {
   lastRead: 'simple-bible/v2/last-read',
   savedVerses: 'simple-bible/v2/saved-verses',
+  themePreference: 'simple-bible/v2/theme-preference',
 } as const;
+
+export type ThemePreference = 'system' | 'light' | 'dark';
 
 export type LastRead = {
   book: string;
@@ -26,6 +29,27 @@ async function readJson<T>(key: string): Promise<T | null> {
     return raw ? (JSON.parse(raw) as T) : null;
   } catch {
     return null;
+  }
+}
+
+function isThemePreference(value: unknown): value is ThemePreference {
+  return value === 'system' || value === 'light' || value === 'dark';
+}
+
+export async function getThemePreference(): Promise<ThemePreference> {
+  try {
+    const raw = await AsyncStorage.getItem(KEYS.themePreference);
+    return isThemePreference(raw) ? raw : 'system';
+  } catch {
+    return 'system';
+  }
+}
+
+export async function setThemePreference(value: ThemePreference) {
+  try {
+    await AsyncStorage.setItem(KEYS.themePreference, value);
+  } catch {
+    // non-fatal; preference just won't persist
   }
 }
 

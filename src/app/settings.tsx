@@ -1,10 +1,18 @@
 import { useYVAuth } from '@youversion/platform-react-native-expo-core';
 import { YouVersionAuthButton } from '@youversion/platform-react-native-expo-ui';
 import Constants from 'expo-constants';
-import { ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/text';
+import type { ThemePreference } from '@/lib/store';
+import { useThemePreference } from '@/providers/theme-preference';
+
+const THEME_OPTIONS: { value: ThemePreference; label: string }[] = [
+  { value: 'system', label: 'System' },
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+];
 
 function SectionLabel({ children, className }: { children: string; className?: string }) {
   return (
@@ -32,8 +40,46 @@ function AccountSection() {
         <Text className="text-muted-foreground mt-1 text-[13px] leading-5">
           Sign in to sync YouVersion features in the reader. Reading works without an account.
         </Text>
-        <View className="mt-4 items-start">
+        <View className="mt-4 items-center">
           <YouVersionAuthButton mode="auto" size="default" radius="rounded" />
+        </View>
+      </View>
+    </>
+  );
+}
+
+function AppearanceSection() {
+  const { preference, setPreference } = useThemePreference();
+
+  return (
+    <>
+      <SectionLabel className="mb-2.5 mt-6">Appearance</SectionLabel>
+      <View className="bg-secondary rounded-[20px] px-4 py-[15px]">
+        <Text className="text-foreground text-base font-medium">Theme</Text>
+        <Text className="text-muted-foreground mt-1 text-[13px] leading-5">
+          Choose light, dark, or match your device setting.
+        </Text>
+        <View className="mt-4 flex-row gap-2">
+          {THEME_OPTIONS.map((option) => {
+            const selected = preference === option.value;
+            return (
+              <Pressable
+                key={option.value}
+                onPress={() => setPreference(option.value)}
+                accessibilityRole="button"
+                accessibilityState={{ selected }}
+                className={`flex-1 items-center rounded-xl py-2.5 ${
+                  selected ? 'bg-accent' : 'bg-background'
+                }`}>
+                <Text
+                  className={`text-sm font-semibold ${
+                    selected ? 'text-primary' : 'text-muted-foreground'
+                  }`}>
+                  {option.label}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
       </View>
     </>
@@ -50,13 +96,7 @@ export default function SettingsScreen() {
 
         <AccountSection />
 
-        <SectionLabel className="mb-2.5 mt-6">Reading</SectionLabel>
-        <View className="bg-secondary rounded-[20px] px-4 py-[15px]">
-          <Text className="text-foreground text-base font-medium">Text size &amp; version</Text>
-          <Text className="text-muted-foreground mt-1 text-[13px] leading-5">
-            Use the reader toolbar to change font size, spacing, and Bible version.
-          </Text>
-        </View>
+        <AppearanceSection />
 
         <SectionLabel className="mb-2.5 mt-6">About</SectionLabel>
         <View className="bg-secondary rounded-[20px] px-4 py-[15px]">

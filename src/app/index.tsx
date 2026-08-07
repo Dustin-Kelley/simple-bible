@@ -1,9 +1,10 @@
+import { useYVAuth } from '@youversion/platform-react-native-expo-core';
 import { VerseOfTheDay } from '@youversion/platform-react-native-expo-ui';
 import type { VerseOfTheDayShareData } from '@youversion/platform-react-ui';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { BookOpen } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
-import { Pressable, ScrollView, Share, View } from 'react-native';
+import { Pressable, ScrollView, Share, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Icon } from '@/components/ui/icon';
@@ -56,10 +57,19 @@ function navigateToRead(
 
 export default function HomeScreen() {
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const { isAuthenticated, userInfo } = useYVAuth();
+
+  // The Verse of the Day card is deliberately inverted against the app chrome:
+  // a near-black card on the light screen, a light card on the dark screen.
+  const votdTheme = colorScheme === 'dark' ? 'light' : 'dark';
   const [lastRead, setLastReadState] = useState<LastRead | null>(null);
   const [saved, setSaved] = useState<SavedVerse[]>([]);
 
   const now = useMemo(() => new Date(), []);
+  const firstName = isAuthenticated
+    ? userInfo?.name?.trim().split(/\s+/)[0] || null
+    : null;
 
   useFocusEffect(
     useCallback(() => {
@@ -98,11 +108,19 @@ export default function HomeScreen() {
         <Text className="text-foreground mt-1 text-3xl font-extrabold tracking-tight">
           {greeting(now.getHours())}
         </Text>
+        {firstName ? (
+          <Text className="text-muted-foreground mt-1 text-lg font-semibold tracking-tight">
+            {firstName}
+          </Text>
+        ) : null}
 
-        <View className="mt-6 overflow-hidden rounded-3xl">
+        {/* Radius matches the SDK card's own `rounded-2xl` so no DOM-body
+            background bleeds through the corners once the card is inverted. */}
+        <View className="mt-6 overflow-hidden rounded-2xl">
           <VerseOfTheDay
             versionId={DEFAULT_VERSION_ID}
-            theme="system"
+            theme={votdTheme}
+            background={votdTheme}
             size="lg"
             showShareButton
             showBibleAppAttribution
