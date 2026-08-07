@@ -1,6 +1,5 @@
 import { useYVAuth } from '@youversion/platform-react-native-expo-core';
 import { YouVersionAuthButton } from '@youversion/platform-react-native-expo-ui';
-import Constants from 'expo-constants';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -87,8 +86,6 @@ function AppearanceSection() {
 }
 
 export default function SettingsScreen() {
-  const version = Constants.expoConfig?.version ?? '1.0.0';
-
   return (
     <SafeAreaView edges={['top']} className="bg-background flex-1">
       <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="px-5 pb-6 pt-3">
@@ -97,14 +94,6 @@ export default function SettingsScreen() {
         <AccountSection />
 
         <AppearanceSection />
-
-        <SectionLabel className="mb-2.5 mt-6">About</SectionLabel>
-        <View className="bg-secondary rounded-[20px] px-4 py-[15px]">
-          <View className="flex-row items-center justify-between">
-            <Text className="text-foreground text-base font-medium">Version</Text>
-            <Text className="text-muted-foreground text-sm font-medium">{version}</Text>
-          </View>
-        </View>
 
         <Text className="text-muted-foreground mt-7 px-2 text-center text-[13px] leading-5">
           Scripture content is provided by YouVersion. Version-specific copyright attributions appear
