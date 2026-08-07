@@ -7,6 +7,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, Share, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ProfileAvatar } from '@/components/profile-avatar';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { chapterLabel, parseLabelReference, parseReference } from '@/lib/reference';
@@ -102,17 +103,22 @@ export default function HomeScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerClassName="px-5 pb-6 pt-3">
-        <Text className="text-muted-foreground text-[13px] font-semibold">
-          {`${WEEKDAYS[now.getDay()]}, ${MONTHS[now.getMonth()]} ${now.getDate()}`}
-        </Text>
-        <Text className="text-foreground mt-1 text-3xl font-extrabold tracking-tight">
-          {greeting(now.getHours())}
-        </Text>
-        {firstName ? (
-          <Text className="text-muted-foreground mt-1 text-lg font-semibold tracking-tight">
-            {firstName}
-          </Text>
-        ) : null}
+        <View className="flex-row items-center gap-3">
+          <View className="min-w-0 flex-1">
+            <Text className="text-muted-foreground text-[13px] font-semibold">
+              {`${WEEKDAYS[now.getDay()]}, ${MONTHS[now.getMonth()]} ${now.getDate()}`}
+            </Text>
+            <Text className="text-foreground mt-1 text-3xl font-extrabold tracking-tight">
+              {greeting(now.getHours())}
+            </Text>
+            {firstName ? (
+              <Text className="text-muted-foreground mt-1 text-lg font-semibold tracking-tight">
+                {firstName}
+              </Text>
+            ) : null}
+          </View>
+          <ProfileAvatar onPress={() => router.navigate('/settings')} />
+        </View>
 
         {/* Radius matches the SDK card's own `rounded-2xl` so no DOM-body
             background bleeds through the corners once the card is inverted. */}
