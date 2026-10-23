@@ -51,38 +51,62 @@
   <main>
     <div class="kicker">Simple Bible</div>
     <h1>Privacy Policy</h1>
-    <p class="muted">Effective July 14, 2026</p>
+    <p class="muted">Effective October 23, 2026</p>
 
-    <p>Simple Bible is an offline Bible reading app. It is built so that your reading stays
-    private: <strong>the app collects no personal data, requires no account, and contains no
-    analytics, advertising, or tracking of any kind.</strong></p>
+    <p>Simple Bible is a Bible reading app. Scripture is loaded from the YouVersion Platform
+    when you open a passage. You can read without an account. Signing in with YouVersion is
+    optional. The app does not include its own analytics or advertising.</p>
 
-    <h2>Data we collect</h2>
-    <p>None. We do not collect, store, sell, or share any information about you. There are no
-    accounts, sign-ins, or profiles.</p>
+    <h2>Who we are</h2>
+    <p>Simple Bible is published by Dustin Kelley. This policy covers the app. Bible text,
+    YouVersion accounts, and the YouVersion API are operated by YouVersion (Life.Church).
+    Their policy is at <a href="https://www.youversion.com/privacy/">youversion.com/privacy</a>.</p>
 
     <h2>Data stored on your device</h2>
-    <p>To make the app work, a few preferences are saved locally on your device only:</p>
     <ul>
-      <li>Your last reading position</li>
-      <li>Verses you choose to save</li>
-      <li>Your text-size setting</li>
+      <li>Your last reading position, verses you choose to save, and your theme</li>
+      <li>If you sign in: access and refresh tokens in the device secure storage, plus a
+      cached name, email address, and avatar so the app can show your account</li>
     </ul>
-    <p>This information never leaves your device and is deleted when you delete the app.</p>
+    <p>Deleting the app deletes this on-device data.</p>
 
-    <h2>Network use</h2>
-    <p>The Bible text is bundled with the app and works fully offline. The only network request
-    the app makes is a check for app updates through Expo's update service at launch; this
-    request contains no personal information. If you use the Share button, sharing is handled
-    entirely by your device's system share sheet.</p>
+    <h2>Data sent off your device</h2>
+    <ul>
+      <li>Passage requests go to YouVersion at api.youversion.com. They include this app's
+      YouVersion App Key and a device identifier: Identifier for Vendor (IDFV) on iOS, or
+      Android ID on Android. The YouVersion SDK sends that value as
+      <code>X-YVP-Installation-Id</code>. Scripture requests send it even when you are
+      signed out. If you sign in, the same identifier is sent on the token request, so
+      YouVersion can tie it to your account. It is not the advertising ID, and it is not
+      your name or email.</li>
+      <li>If you sign in, you use YouVersion's sign-in page. YouVersion receives that
+      sign-in. The app asks only for the profile and email scopes, so it can show your
+      name and avatar. We never receive your YouVersion password.</li>
+      <li>At launch the app may contact Expo to check for an app update. That check is not
+      tied to your YouVersion account.</li>
+      <li>Share uses your device's share sheet. We do not receive the shared text.</li>
+    </ul>
+    <p>We do not sell personal information. We do not use the data above for tracking or ads.</p>
+
+    <h2>Permissions</h2>
+    <p>The app does not ask for your camera, microphone, location, contacts, or photos.</p>
+
+    <h2>Deleting data</h2>
+    <p>Delete the app to remove reading history, saved verses, theme, and sign-in tokens from
+    the device. To delete a YouVersion account, use YouVersion's own account tools. This app
+    cannot delete that account for you.</p>
 
     <h2>Children's privacy</h2>
-    <p>The app is suitable for all ages and, as described above, collects no data from anyone,
-    including children.</p>
+    <p>You can use the app without an account. We do not knowingly collect personal
+    information from children. YouVersion account rules are set by YouVersion.</p>
+
+    <h2>Bible text</h2>
+    <p>Each Bible version stays under its publisher's copyright. The reader and the verse of
+    the day show the attribution YouVersion supplies for the version you are reading.</p>
 
     <h2>Changes to this policy</h2>
-    <p>If this policy ever changes, the updated version will be posted at this address with a
-    new effective date.</p>
+    <p>If this policy changes, the updated version will be posted at this address with a new
+    effective date.</p>
 
     <hr>
 
@@ -93,8 +117,8 @@
       <li>Project: <a href="https://github.com/Dustin-Kelley/simple-bible">github.com/Dustin-Kelley/simple-bible</a></li>
     </ul>
 
-    <p class="muted">Scripture quotations are from the King James Version, which is in the
-    public domain.</p>
+    <p class="muted">Bible text is provided by YouVersion. Each version keeps its own copyright,
+    shown in the reader.</p>
   </main>
 </body>
 </html>
