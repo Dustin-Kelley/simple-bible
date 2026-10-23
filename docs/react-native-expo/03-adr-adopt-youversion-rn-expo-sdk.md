@@ -4,7 +4,9 @@ Date: 2026-07-17
 
 ## Status
 
-Proposed
+Accepted. Implemented on Expo SDK 57 with YouVersion SDK 2.1.0.
+`BibleReader` is the Read screen. Home passage jumps use
+`createBibleReaderNavigation`.
 
 ## Context
 
@@ -15,16 +17,16 @@ the Day, and optionally YouVersion sign-in.
 
 YouVersion ships an official SDK for exactly this:
 
-- `@youversion/platform-react-native-expo-ui@1.0.0` — Bible components + provider
-- `@youversion/platform-react-native-expo-core@1.0.0` — installation id, PKCE
+- `@youversion/platform-react-native-expo-ui@2.1.0` — Bible components + provider
+- `@youversion/platform-react-native-expo-core@2.1.0` — installation id, PKCE
   auth, token storage
 
-Both are v1.0.0, Apache-2.0, maintained by Life.Church. The UI package is built
-on the **web** SDK's `@youversion/platform-react-ui@2.2.0`, rendered inside a
+Both are v2.1.0, Apache-2.0, maintained by Life.Church. The UI package is built
+on the **web** SDK's `@youversion/platform-react-ui@2.15.0`, rendered inside a
 WebView via [Expo DOM Components](https://docs.expo.dev/guides/dom-components/) —
 so the native and web SDKs are versioned and evolved together.
 
-Simple Bible is a compatible host: Expo `~56.0.11`, React `19.2.3`, RN `0.85.3`,
+Simple Bible is a compatible host: Expo `~57.0.31`, React `19.2.3`, RN `0.86.3`,
 a `expo-dev-client` dev build, scheme `simplebible`, expo-router under `src/app`.
 
 The realistic alternatives:
@@ -47,11 +49,14 @@ in Simple Bible. Import Bible UI from `-ui`; import auth (`useYVAuth`,
 
 Baseline versions and constraints we accept:
 
-- The app stays on Expo **56** / React **19** (already true); the SDK's peer
-  ranges are satisfied.
-- We install the additional peers (`@gorhom/bottom-sheet`, `@expo/dom-webview`,
-  `react-native-svg`, `expo-secure-store`, `expo-application`, `expo-crypto`,
-  `react-native-mmkv`, `react-native-nitro-modules`) and rebuild the dev client.
+- The app is on Expo **57** / React **19** / React Native **0.86**. SDK 2.1
+  requires that range, and Expo `57.0.23+` for the iOS 27 scene lifecycle.
+  `ios.enableSceneSupport` is on.
+- Peers include `@gorhom/bottom-sheet`, `@expo/dom-webview`, `react-native-svg`,
+  `expo-secure-store`, `expo-application`, `expo-crypto`, `expo-clipboard`,
+  `expo-font`, `expo-network`, `react-native-mmkv`, and
+  `react-native-nitro-modules`. `react-native-reanimated` is `4.5.5` because
+  the UI package requires `>=4.5.3`. A new dev client is required.
 - App Key via `EXPO_PUBLIC_YOUVERSION_APP_KEY`; auth redirect
   `simplebible://callback`.
 
@@ -84,25 +89,25 @@ meet) forces native rendering.
 - **Heavier native footprint.** Adds MMKV + nitro-modules, SVG, bottom-sheet,
   secure-store, crypto — more native modules to keep version-aligned, and a dev
   client rebuild is required.
-- **Version coupling.** Locked to Expo SDK 56 / React 19 ranges; a future Expo
-  upgrade must wait for a compatible SDK release.
+- **Version coupling.** Locked to Expo SDK 57 / React Native 0.86 ranges; a
+  future Expo upgrade must wait for a compatible SDK release.
 - **Online dependency.** Content now requires network + a valid App Key, where
   the bundled KJV worked fully offline. Decide whether an offline fallback stays.
 - **Attribution obligations.** Some Bible versions require visible copyright
   attribution; shipping without it is a licensing risk.
 
-## Open questions (resolve before writing integration code)
+## Resolved during implementation
 
-1. **Scope of v1:** just `VerseOfTheDay` / `BibleCard` on the home screen, or the
-   full `BibleReader` (with auth) replacing the local-KJV reader on `read.tsx`?
-2. **Is authentication in scope for v1?** If yes, register
-   `simplebible://callback` and confirm scopes (`profile`, `email`) on the
-   platform dashboard.
-3. **Offline fallback:** keep `src/data/kjv.json` + `src/lib/bible.ts` as an
-   offline path, or fully replace it?
-4. **Attribution:** which `versionId`s will we ship, and what does each require?
-5. **Non-prod API host:** do we need to point `apiHost` at a staging environment
-   during development?
+1. **Reader:** `BibleReader` is the Read screen, with the SDK toolbar. The
+   hand-built header and picker sheets are gone.
+2. **Last read:** book, chapter, and version are controlled props backed by
+   the existing AsyncStorage record. `createBibleReaderNavigation` is how Home
+   jumps into a passage.
+3. **Auth:** optional, redirect `simplebible://callback`. Reading works signed
+   out. Highlights need the `highlights` permission, which this app does not
+   request yet.
+4. **Offline fallback:** the bundled KJV path is not in the app. Scripture
+   comes from YouVersion and needs a network plus an App Key.
 
 ## References
 

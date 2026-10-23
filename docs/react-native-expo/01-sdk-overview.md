@@ -1,8 +1,8 @@
 # YouVersion RN (Expo) SDK — Overview & API Reference
 
-> Derived on 2026-07-17 from the published `@1.0.0` tarballs' type definitions,
-> READMEs, and package.json, plus the official Quick Start. Treat the `.d.ts`
-> details below as authoritative; prose is interpretation.
+> Updated 2026-10-23 from the published `@2.1.0` packages, the Quick Start, and
+> the Components reference. Treat the installed `.d.ts` files as authoritative
+> when this page and the package disagree.
 
 ## 1. What it is
 
@@ -14,8 +14,10 @@ Two packages that drop YouVersion Bible content and authentication into an
 | `@youversion/platform-react-native-expo-ui` | Pre-built Bible components + the `YouVersionProvider` (theming, native sheets, auth wiring) | `@youversion/platform-react-ui` |
 | `@youversion/platform-react-native-expo-core` | Installation id, optional PKCE OAuth (`useYVAuth`), token storage | roughly `@youversion/platform-core` + auth |
 
-Both are **v1.0.0**, Apache-2.0. The UI package depends on core, and — critically
-— on the web SDK's `@youversion/platform-react-ui@2.2.0`.
+Both are **v2.1.0**, Apache-2.0. The UI package depends on core **2.1.0** and
+on `@youversion/platform-react-ui@2.15.0`. Scripture still renders in a WebView.
+The reader toolbar, pickers, search, and verse actions are native on iOS and
+Android. On web, `BibleReader` keeps the web SDK toolbar inside the WebView.
 
 ## 2. How it's built — the key architectural fact
 
@@ -49,9 +51,11 @@ Implications to keep in mind:
 
 ## 3. Requirements
 
-- **Expo SDK 56+** (peer range `>=56.0.0 <57.0.0`). Simple Bible: `~56.0.11` ✅
+- **Expo SDK 57** (peer range `>=57.0.0 <58.0.0`). YouVersion 2.0.0+ was built
+  against Expo `57.0.23` for the iOS 27 scene-lifecycle backport. Simple Bible:
+  `~57.0.31`, with `ios.enableSceneSupport` on. ✅
 - **React 19** (`>=19.0.0 <20.0.0`), `react-dom` 19. Simple Bible: `19.2.3` ✅
-- **React Native** `>=0.83.0` (UI) / `>=0.85.0` (core). Simple Bible: `0.85.3` ✅
+- **React Native** `>=0.86.0`. Simple Bible: `0.86.3` ✅
 - A **development build** — not Expo Go. Simple Bible uses `expo-dev-client` ✅
 - Node 24 was used to build/publish (`_nodeVersion: 24.18.0`).
 - A free **App Key** from [platform.youversion.com](https://platform.youversion.com/),
@@ -59,45 +63,48 @@ Implications to keep in mind:
 
 ## 4. Packages, dependencies, peers
 
-### `@youversion/platform-react-native-expo-ui@1.0.0`
+### `@youversion/platform-react-native-expo-ui@2.1.0`
 
 Runtime deps: `@radix-ui/react-use-controllable-state`, `@rn-primitives/portal`,
-**`@youversion/platform-react-ui@2.2.0`**, `expo-localization`, `i18next`,
-`react-i18next`, `zustand`, and `@youversion/platform-react-native-expo-core@1.0.0`.
+**`@youversion/platform-react-ui@2.15.0`**, `expo-localization`, `i18next`,
+`react-i18next`, `zustand`, and `@youversion/platform-react-native-expo-core@2.1.0`.
 
 Peer deps (installed in the app). The "Simple Bible" column shows current state
 (checked against `package.json` on 2026-07-17):
 
 | Peer | Range | Simple Bible |
 | --- | --- | --- |
-| `expo` | `>=56 <57` | ✅ `~56.0.11` |
-| `@expo/dom-webview` | `>=56 <57` | ❌ add |
-| `@gorhom/bottom-sheet` | `>=5.0.0` | ❌ add |
-| `expo-web-browser` | `>=56 <57` | ✅ present |
-| `react` / `react-dom` | `>=19 <20` | ✅ present |
-| `react-native` | `>=0.83.0` | ✅ `0.85.3` |
-| `react-native-gesture-handler` | `>=2.16.1` | ✅ present |
-| `react-native-reanimated` | `>=3.16.0` | ✅ present |
-| `react-native-safe-area-context` | `>=5.0.0` | ✅ present |
-| `react-native-svg` | `>=15.15.0` | ❌ add |
-| `react-native-webview` | `>=13.13.0` | **optional** (only if opting out of DOM webview) |
-| `react-native-worklets` | `>=0.8.0` | **optional** (❌ add if used) |
+| `expo` | `>=57 <58` | ✅ `~57.0.31` |
+| `@expo/dom-webview` | `>=57 <58` | ✅ |
+| `@gorhom/bottom-sheet` | `>=5.0.0` | ✅ |
+| `expo-application` | `>=57 <58` | ✅ |
+| `expo-clipboard` | `>=57 <58` | ✅ (Copy in the verse action sheet) |
+| `expo-font` | `>=57 <58` | ✅ (brand fonts; a peer since UI 1.5.0) |
+| `expo-web-browser` | `>=57 <58` | ✅ |
+| `react` / `react-dom` | `>=19 <20` | ✅ |
+| `react-native` | `>=0.86.0` | ✅ `0.86.3` |
+| `react-native-gesture-handler` | `>=2.16.1` | ✅ |
+| `react-native-reanimated` | `>=4.5.3` | ✅ `4.5.5` (above Expo's bundled 4.5.1; excluded from `expo install` validation) |
+| `react-native-safe-area-context` | `>=5.0.0` | ✅ |
+| `react-native-svg` | `>=15.15.0` | ✅ |
+| `react-native-webview` | `>=13.13.0` | optional |
+| `react-native-worklets` | `>=0.9.1` | ✅ `0.10.1` |
 
-### `@youversion/platform-react-native-expo-core@1.0.0`
+### `@youversion/platform-react-native-expo-core@2.1.0`
 
 Runtime deps: `zod@4.4.3`.
 
 | Peer | Range | Simple Bible |
 | --- | --- | --- |
-| `expo` | `>=56 <57` | ✅ |
-| `expo-application` | `>=56 <57` | ❌ add (installation id) |
-| `expo-crypto` | `>=56 <57` | ❌ add (PKCE) |
-| `expo-secure-store` | `>=56 <57` | ❌ add (token storage) |
-| `expo-web-browser` | `>=56 <57` | ✅ present |
+| `expo` | `>=57 <58` | ✅ |
+| `expo-crypto` | `>=57 <58` | ✅ |
+| `expo-network` | `>=57 <58` | ✅ |
+| `expo-secure-store` | `>=57 <58` | ✅ |
+| `expo-web-browser` | `>=57 <58` | ✅ |
 | `react` | `>=19 <20` | ✅ |
-| `react-native` | `>=0.85.0` | ✅ `0.85.3` |
-| `react-native-mmkv` | `>=4.0.0 <5.0.0` | ❌ add |
-| `react-native-nitro-modules` | `>=0.35.0 <0.37.0` | ❌ add (MMKV backend) |
+| `react-native` | `>=0.86.0` | ✅ `0.86.3` |
+| `react-native-mmkv` | `>=4.0.0 <5.0.0` | ✅ |
+| `react-native-nitro-modules` | `>=0.35.0 <0.37.0` | ✅ |
 
 > Also required by the UI runtime dep chain but not a peer: `expo-localization`
 > (bundled) — no action needed.
@@ -179,12 +186,40 @@ type BibleReaderProps = {
   onChapterPickerPress?: (data: BibleChapterPickerPressData) => Promise<void>
   onVersionPickerPress?: (data: BibleVersionPickerPressData) => Promise<void>
   onFootnotePress?: (data: FootnoteData) => Promise<void>
-  showToolbar?: boolean
+  showToolbar?: boolean       // default true; false also hides built-in sheets
   backgroundColor?: string
   foregroundColor?: string
+  navigation?: BibleReaderNavigation  // createBibleReaderNavigation()
   dom?: import('expo/dom').DOMProps
 }
 ```
+
+Uncontrolled readers persist book, chapter, and version in MMKV and restore
+them on the next launch. Controlled `book` / `chapter` / `versionId` win, and
+the SDK does not overwrite that snapshot. Simple Bible keeps those three
+controlled so the home "Continue reading" card and the reader share one
+last-read record.
+
+`createBibleReaderNavigation()` returns one pending-request object per reader.
+Call it before or after the reader mounts. A newer call replaces an older one.
+The reader consumes each request once.
+
+```ts
+navigation.request({ versionId: 3034, bookId: 'JHN', chapter: 3 })
+navigation.focusReference({
+  versionId: 3034,
+  bookId: 'JHN',
+  chapter: 3,
+  verse: 16,
+  passageId: 'JHN.3.16',
+})
+```
+
+`request` loads the chapter and does not focus a verse. `chapter` is a number.
+`focusReference` loads the chapter, scrolls to the verse, and dims the rest.
+Pass the original `passageId` for a verse range. Both calls go through the
+book / chapter / version setters, so controlled props still notify
+`onBookChange` / `onChapterChange` / `onVersionChange`.
 
 At the DOM layer, auth is opt-in via a discriminated union:
 `{ includeAuth: true; authRedirectUrl: string } | { includeAuth?: false }`. The
@@ -251,11 +286,8 @@ Branded sign-in / sign-out button.
 
 ```ts
 type YouVersionAuthButtonProps = {
-  background?: 'light' | 'dark'
-  radius?: 'rounded' | 'rectangular'
-  outline?: boolean
+  background?: 'light' | 'dark'          // default 'light'
   mode?: 'auto' | 'signIn' | 'signOut'   // 'auto' follows auth state
-  size?: 'default' | 'short' | 'icon'
   text?: string                          // override localized label
 }
 ```
@@ -373,6 +405,6 @@ both authed and non-authed states.
   and the format (the quick start links a "copyright attribution requirements"
   page; confirm per version id we ship).
 - The full set of **web props** inherited by `BibleCard` / `BibleTextView` /
-  `VerseOfTheDay` — these come from `@youversion/platform-react-ui@2.2.0`; the
+  `VerseOfTheDay` — these come from `@youversion/platform-react-ui@2.15.0`; the
   exhaustive prop list is in that package's published types
   (`node_modules/@youversion/platform-react-ui` once installed).

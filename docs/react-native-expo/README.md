@@ -1,51 +1,49 @@
 # YouVersion React Native (Expo) SDK — Documentation Set
 
-Research and reference docs gathered **before** implementing the YouVersion
-Platform React Native (Expo) SDK in the **Simple Bible** app. No app code has
-been changed yet. These docs exist so we understand the SDK — its shape,
-requirements, and trade-offs — before wiring it in.
+Reference for the YouVersion Platform React Native (Expo) SDK as used by
+**Simple Bible**.
 
 ## Read in this order
 
 1. **[01-sdk-overview.md](./01-sdk-overview.md)** — What the SDK is, how it's
-   built (Expo DOM Components over the Web SDK), the two packages, and the full
-   component / hook / auth API reference derived from the shipped type
-   definitions.
-2. **[02-integration-guide.md](./02-integration-guide.md)** — Step-by-step setup
-   **for this app**: install, peer dependencies (with what Simple Bible already
-   has vs. still needs), provider wiring, environment variables, the
-   `simplebible://` auth redirect, and common gotchas.
+   built, and the component / hook / auth API this app depends on.
+2. **[02-integration-guide.md](./02-integration-guide.md)** — How Simple Bible
+   is wired: packages, provider, theme, reader navigation, and auth redirect.
 3. **[03-adr-adopt-youversion-rn-expo-sdk.md](./03-adr-adopt-youversion-rn-expo-sdk.md)**
-   — Architecture Decision Record: the decision to adopt the SDK, alternatives
-   considered, consequences, and remaining questions.
+   — Architecture Decision Record for adopting the SDK.
 
-## This app is a compatible target ✅
+## This app's versions
 
-Simple Bible already satisfies the SDK's hard requirements:
-
-| Requirement | SDK needs | Simple Bible has |
+| Requirement | SDK 2.1.0 needs | Simple Bible |
 | --- | --- | --- |
-| Expo SDK | `>=56 <57` | `~56.0.11` |
+| Expo SDK | `>=57.0.0 <58.0.0`, and `>=57.0.23` for the iOS 27 scene backport | `~57.0.31` |
 | React | `>=19 <20` | `19.2.3` |
-| React Native | `>=0.85.0` (core) / `>=0.83.0` (ui) | `0.85.3` |
-| Dev build | required (not Expo Go) | uses `expo-dev-client` |
+| React Native | `>=0.86.0` | `0.86.3` |
+| Dev build | required (not Expo Go) | `expo-dev-client` |
 | Scheme (for auth) | any registered scheme | `simplebible` |
 
-The SDK's UI package renders YouVersion's **web** SDK
-(`@youversion/platform-react-ui@2.2.0`) inside a WebView via
-[Expo DOM Components](https://docs.expo.dev/guides/dom-components/). That web SDK
-is maintained in a separate repo (`youversion/platform-sdk-react`); here we only
-consume the published npm packages.
+YouVersion UI and core are both **2.1.0**. The UI package renders scripture from
+`@youversion/platform-react-ui` inside a WebView via
+[Expo DOM Components](https://docs.expo.dev/guides/dom-components/). Native
+chrome (toolbar, pickers, verse actions) is React Native.
+
+`BibleReader` on `src/app/read.tsx` is the reading surface. Home jumps
+(continue reading, saved verses, verse of the day) go through one shared
+`createBibleReaderNavigation()` object. Book, chapter, and version stay
+controlled so the existing last-read store still drives the home card.
 
 ## Source facts
 
-Everything in these docs was derived on **2026-07-17** from:
+Updated **2026-10-23** from:
 
-- npm registry metadata for `@youversion/platform-react-native-expo-ui@1.0.0`
-  and `@youversion/platform-react-native-expo-core@1.0.0`
-- The shipped `README.md`, `package.json`, and **`.d.ts` type definitions** inside
-  both published tarballs (the ground truth for exported APIs and props)
+- npm `@youversion/platform-react-native-expo-ui@2.1.0` and
+  `@youversion/platform-react-native-expo-core@2.1.0`
+- The published type definitions in those packages
 - The [React Native (Expo) Quick Start](https://developers.youversion.com/sdks/react-native-expo/quick-start)
+  and [Components](https://developers.youversion.com/sdks/react-native-expo/components)
+- The [SDK repo](https://github.com/youversion/platform-sdk-reactnative-expo)
 
-Both packages are at **v1.0.0**, Apache-2.0, published via GitHub Actions OIDC
-trusted publishing by Life.Church maintainers.
+iOS builds with Xcode 27 need the UIKit scene lifecycle. `app.json` opts in
+with `expo-build-properties` `ios.enableSceneSupport` (Expo `57.0.23+`). A new
+development build is required after this upgrade. Web does not exercise that
+native startup path.
