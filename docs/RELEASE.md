@@ -20,7 +20,7 @@ Read [README.md](../README.md) for day-to-day setup. YouVersion's own steps are 
 
    The app scheme in `app.json` is `simplebible`. The redirect the provider uses is `AUTH_REDIRECT_URI` in `src/lib/youversion.ts`. Those two have to stay in lockstep. Sign-in scopes are the SDK default, `profile` and `email`. Highlights are not requested.
 
-3. Add a callback screen before you call sign-in done. The YouVersion guide expects a route at `callback` that sends the person back to Home. This app's root layout is a native tab navigator with Home, Read, and Settings only. A hidden native tab cannot be opened. The callback screen has to live outside those tabs (a root stack, with the tabs as one screen and `callback` as another). That navigation change belongs with the reader work. This release pass did not edit `src/app`. Until that route exists, a finished sign-in can open an unmatched route.
+3. The callback route is already in the app. `src/app/callback.tsx` matches `simplebible://callback`. The root layout is a stack: Home, Read, and Settings stay in one tab navigator, and `callback` is a separate screen. A hidden native tab cannot be opened, so the callback is not a tab. When the redirect arrives, that screen goes back to the tab you left, or to Home if there is nothing to go back to. You still register the URI in the console (step 2) before testing sign-in on a device.
 
 4. Publish [docs/index.html](index.html) at a public HTTPS URL. That page is the privacy policy and the support contact. The previous copy said the app was an offline King James Bible with no account. That is no longer true. Replace any live copy of the old page before review.
 
@@ -118,7 +118,6 @@ These were left as they are so an already-registered store app or YouVersion key
 - **Bundle IDs do not match.** iOS is `com.dustinkelley.simple-bible` (hyphen). Android is `com.dustinkelley.simplebible` (no hyphen). Change either one only if that store app does not exist yet. After the first upload, the id is permanent.
 - **URL scheme is `simplebible`.** YouVersion recommends a reverse-DNS scheme such as `com.dustinkelley.simplebible`, because custom schemes are not owned. On Android, two apps with the same scheme make the system ask which app to open. Keep `simplebible` if the callback is already registered. If you change it before release, change `expo.scheme` and `AUTH_REDIRECT_URI` together, register the new `scheme://callback`, and rebuild. A JavaScript update cannot change the scheme.
 - **iPhone only.** `supportsTablet` is false. Turn it on only if you want an iPad layout, then rebuild.
-- **Sign-in callback route** is not in the app yet. See step 3.
 - **Android submit stays on the internal draft track** until you change `eas.json` or promote the release.
 - **Highlights** are off. To save highlights to YouVersion, add `permissions: ['highlights']` on the provider `auth` config and have existing users sign in again. That edit is in `src/app/_layout.tsx`, which this pass did not touch.
 - **`package.json` version is `1.0.0`.** The store version is `app.json` `1.1.0`. Leave the package version unless you want them to match. Stores do not read it.
