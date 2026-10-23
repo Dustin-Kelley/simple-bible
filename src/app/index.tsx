@@ -1,16 +1,21 @@
-import { useYVAuth } from '@youversion/platform-react-native-expo-core';
+import {
+  biblePassageAnchorFromPassageId,
+  useYVAuth,
+  useYouVersion,
+} from '@youversion/platform-react-native-expo-core';
 import { VerseOfTheDay } from '@youversion/platform-react-native-expo-ui';
 import type { VerseOfTheDayShareData } from '@youversion/platform-react-ui';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { BookOpen } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
-import { Pressable, ScrollView, Share, useColorScheme, View } from 'react-native';
+import { Pressable, ScrollView, Share, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ProfileAvatar } from '@/components/profile-avatar';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { chapterLabel, parseLabelReference, parseReference } from '@/lib/reference';
+import { focusPassage, requestChapter, useReaderNavigation } from '@/lib/reader-navigation';
 import {
   DEFAULT_LAST_READ,
   getLastRead,
@@ -19,7 +24,9 @@ import {
   type LastRead,
   type SavedVerse,
 } from '@/lib/store';
+import { fetchVerseOfTheDayPassageId } from '@/lib/verse-of-the-day';
 import { DEFAULT_VERSION_ID } from '@/lib/youversion';
+import { useThemePreference } from '@/providers/theme-preference';
 
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const MONTHS = [
@@ -42,24 +49,14 @@ function SectionLabel({ children, className }: { children: string; className?: s
   );
 }
 
-function navigateToRead(
-  router: ReturnType<typeof useRouter>,
-  target: { book: string; chapter: string; versionId?: number }
-) {
-  router.navigate({
-    pathname: '/read',
-    params: {
-      book: target.book,
-      chapter: target.chapter,
-      ...(target.versionId != null ? { versionId: String(target.versionId) } : {}),
-    },
-  });
-}
-
 export default function HomeScreen() {
   const router = useRouter();
-  const colorScheme = useColorScheme();
+  const navigation = useReaderNavigation();
+  const { appKey, apiHost, installationId } = useYouVersion();
+  const { colorScheme } = useThemePreference();
   const { isAuthenticated, userInfo } = useYVAuth();
+  const [openingDaily, setOpeningDaily] = useState(false);
+  const [dailyError, setDailyError] = useState(false);
 
   // The Verse of the Day card is deliberately inverted against the app chrome:
   // a near-black card on the light screen, a light card on the dark screen.
@@ -81,6 +78,52 @@ export default function HomeScreen() {
 
   const continueTarget = lastRead ?? DEFAULT_LAST_READ;
   const latestSaved = saved[0] ?? null;
+
+  const openChapter = (target: { book: string; chapter: string; versionId?: number }) => {
+    requestChapter(navigation, target);
+    router.navigate('/read');
+  };
+
+  const openSaved = (item: SavedVerse) => {
+    const parsed =
+      parseReference(item.reference) ??
+      parseLabelReference(item.label) ??
+      parseLabelReference(item.reference);
+    if (!parsed) return;
+
+    focusPassage(navigation, {
+      book: parsed.book,
+      chapter: parsed.chapter,
+      verse: parsed.verse,
+      versionId: item.versionId,
+      passageId: item.reference.includes('.') ? item.reference : undefined,
+    });
+    router.navigate('/read');
+  };
+
+  const openVerseOfTheDay = async () => {
+    setDailyError(false);
+    setOpeningDaily(true);
+    const passageId = await fetchVerseOfTheDayPassageId({ appKey, apiHost, installationId });
+    setOpeningDaily(false);
+    if (!passageId) {
+      setDailyError(true);
+      return;
+    }
+
+    const anchor = biblePassageAnchorFromPassageId(passageId, DEFAULT_VERSION_ID);
+    if (!anchor) {
+      setDailyError(true);
+      return;
+    }
+
+    if (anchor.verse === undefined) {
+      navigation.request(anchor);
+    } else {
+      navigation.focusReference({ ...anchor, passageId });
+    }
+    router.navigate('/read');
+  };
 
   const onShareDaily = async (data: VerseOfTheDayShareData) => {
     await Share.share({ message: data.text });
@@ -133,10 +176,26 @@ export default function HomeScreen() {
             onShare={onShareDaily}
           />
         </View>
+        <Pressable
+          onPress={() => {
+            void openVerseOfTheDay();
+          }}
+          disabled={openingDaily}
+          accessibilityRole="button"
+          className="mt-3 items-center py-2">
+          <Text className="text-primary text-sm font-semibold">
+            {openingDaily ? 'Opening…' : 'Read this verse'}
+          </Text>
+        </Pressable>
+        {dailyError ? (
+          <Text className="text-muted-foreground text-center text-[13px]">
+            Could not open the verse for today. Try again.
+          </Text>
+        ) : null}
 
         <SectionLabel className="mb-3 mt-7">Continue reading</SectionLabel>
         <Pressable
-          onPress={() => navigateToRead(router, continueTarget)}
+          onPress={() => openChapter(continueTarget)}
           className="bg-secondary dark:border-border flex-row items-center gap-4 rounded-[18px] p-[18px] dark:border">
           <View className="bg-accent h-[50px] w-[50px] items-center justify-center rounded-[14px]">
             <Icon as={BookOpen} size={24} className="text-primary" strokeWidth={1.8} />
@@ -155,21 +214,10 @@ export default function HomeScreen() {
           <>
             <SectionLabel className="mb-3 mt-7">Recently saved</SectionLabel>
             {saved.slice(0, 5).map((item) => {
-              const parsed =
-                parseReference(item.reference) ??
-                parseLabelReference(item.label) ??
-                parseLabelReference(item.reference);
               return (
                 <Pressable
                   key={`${item.reference}-${item.versionId}-${item.savedAt}`}
-                  onPress={() => {
-                    if (!parsed) return;
-                    navigateToRead(router, {
-                      book: parsed.book,
-                      chapter: parsed.chapter,
-                      versionId: item.versionId,
-                    });
-                  }}
+                  onPress={() => openSaved(item)}
                   className="bg-secondary dark:border-border mb-2.5 rounded-[18px] px-[18px] py-4 dark:border">
                   <Text className="text-primary text-xs font-semibold">{item.label}</Text>
                   <Text className="text-muted-foreground mt-1 text-[13px] font-medium">

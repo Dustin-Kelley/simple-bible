@@ -40,7 +40,7 @@ function AccountSection() {
           Sign in to sync YouVersion features in the reader. Reading works without an account.
         </Text>
         <View className="mt-4 items-center">
-          <YouVersionAuthButton mode="auto" size="default" radius="rounded" />
+          <YouVersionAuthButton mode="auto" />
         </View>
       </View>
     </>

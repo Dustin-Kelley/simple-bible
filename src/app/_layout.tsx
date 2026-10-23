@@ -10,6 +10,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import AppTabs from '@/components/app-tabs';
 import { Text } from '@/components/ui/text';
+import { ReaderNavigationProvider } from '@/lib/reader-navigation';
 import { NAV_THEME } from '@/lib/theme';
 import { AUTH_REDIRECT_URI } from '@/lib/youversion';
 import {
@@ -65,7 +66,9 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemePreferenceProvider>
-        <AppProviders appKey={appKey} />
+        <ReaderNavigationProvider>
+          <AppProviders appKey={appKey} />
+        </ReaderNavigationProvider>
       </ThemePreferenceProvider>
     </GestureHandlerRootView>
   );

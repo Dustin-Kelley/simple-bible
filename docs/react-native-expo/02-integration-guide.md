@@ -1,13 +1,14 @@
 # YouVersion RN (Expo) SDK — Integration Guide (Simple Bible)
 
-> A practical setup checklist for adding the SDK to **this app** (`simple-bible`,
-> Expo 56, expo-router, NativeWind, npm). Nothing here has been applied — it's
-> the plan. Package manager is **npm** (`package-lock.json`).
+> How the SDK is wired in **this app** (`simple-bible`, Expo 57, expo-router,
+> NativeWind, npm). Package manager is **npm** (`package-lock.json`).
+> Packages are `@youversion/platform-react-native-expo-ui@2.1.0` and
+> `@youversion/platform-react-native-expo-core@2.1.0`.
 
 ## Prerequisites (already satisfied)
 
-- Expo **SDK ~56.0.11**, React **19.2.3**, RN **0.85.3** — all within the SDK's
-  supported ranges.
+- Expo **SDK ~57.0.31**, React **19.2.3**, RN **0.86.3** — within the SDK 2.1
+  peer ranges. Expo `57.0.23` or newer is required for the iOS 27 scene backport.
 - A **development build** via `expo-dev-client` — required (Expo Go will not
   work; the SDK uses native modules).
 - App scheme `simplebible` is configured in `app.json`.
@@ -40,7 +41,7 @@ Simple Bible **already has**: `expo`, `expo-web-browser`, `react`, `react-dom`,
 `react-native`, `react-native-gesture-handler`, `react-native-reanimated`,
 `react-native-safe-area-context`.
 
-Still **needs** (for UI + core + auth):
+Installed for UI, core, and auth (Expo 57 ranges):
 
 ```bash
 npx expo install \
@@ -49,7 +50,11 @@ npx expo install \
   react-native-svg \
   expo-secure-store \
   expo-application \
-  expo-crypto
+  expo-crypto \
+  expo-clipboard \
+  expo-font \
+  expo-network \
+  expo-build-properties
 ```
 
 MMKV-backed storage (core) also needs native modules:
@@ -64,7 +69,10 @@ Optional, only if you opt out of the default DOM webview or use worklets:
 npx expo install react-native-webview react-native-worklets
 ```
 
-> Use `npx expo install` (not `npm add`) so versions are pinned to Expo 56.
+> Use `npx expo install` (not `npm add`) so versions are pinned to Expo 57.
+> `react-native-reanimated` is an exception: the UI package requires `>=4.5.3`,
+> and Expo SDK 57 bundles `4.5.1`. This app pins `4.5.5` and lists it in
+> `expo.install.exclude`.
 > `react-native-reanimated` is already wired in `babel.config.js`; if you add
 > `react-native-worklets`, follow its Babel-plugin note. After adding native
 > modules, rebuild the dev client (`npx expo run:ios` / `run:android` or an EAS
@@ -118,12 +126,25 @@ export default function HomeScreen() {
 
 Or the full reader:
 
-```tsx
-import { BibleReader } from '@youversion/platform-react-native-expo-ui'
+The Read route renders `BibleReader` with the app theme preference (`light`,
+`dark`, or `system`) and controlled `book` / `chapter` / `versionId`. Those
+controlled props are the last-read record in AsyncStorage, so the home card
+and the reader stay on the same passage, including a position saved before
+the SDK's own MMKV snapshot existed.
 
-export default function ReadScreen() {
-  return <BibleReader defaultBook="JHN" defaultChapter="3" defaultVersionId={3034} />
-}
+Jumps from Home use one `createBibleReaderNavigation()` object created above
+the tabs (`src/lib/reader-navigation.tsx`). Continue reading calls `request`.
+A saved verse or the verse of the day calls `focusReference` when a verse is
+known. The reader consumes the request once and reports the new location
+through `onBookChange` / `onChapterChange` / `onVersionChange`.
+
+```tsx
+import { BibleReader, createBibleReaderNavigation } from '@youversion/platform-react-native-expo-ui'
+
+const navigation = createBibleReaderNavigation()
+navigation.focusReference({ versionId: 3034, bookId: 'JHN', chapter: 3, verse: 16 })
+
+<BibleReader navigation={navigation} theme="system" book="JHN" chapter="3" versionId={3034} />
 ```
 
 ## Step 6 — (Optional) Enable authentication
@@ -186,6 +207,11 @@ function ProfileBadge() {
   DOM WebView; expect slightly higher memory than pure-native views and a brief
   first-paint. Don't mount many `BibleCard`s in a long list without
   virtualization.
+- **Web `fetch` loop.** On web the DOM bundle and the app share one realm. The
+  SDK's content-cache `fetch` wrapper then calls itself. `index.js` imports
+  `src/lib/keep-web-fetch.ts` after `@expo/metro-runtime` and locks `fetch` so
+  the wrapper cannot replace it. Native is unchanged: that wrapper runs in the
+  WebView, not in the app entry.
 - **NativeWind won't style SDK components.** They're self-styled via the web SDK;
   use the components' documented props (`theme`, `backgroundColor`,
   `foregroundColor`) rather than Tailwind classes.
