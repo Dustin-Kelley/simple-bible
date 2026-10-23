@@ -1,6 +1,6 @@
 # Simple Bible
 
-Simple Bible is a production showcase of the [YouVersion React Native (Expo) SDK](https://developers.youversion.com/sdks/react-native-expo/quick-start). Bible text is loaded from YouVersion. The app needs a network connection and a YouVersion App Key. It does not ship a bundled Bible, and it does not include its own search index.
+Simple Bible is a production showcase of the [YouVersion React Native (Expo) SDK](https://developers.youversion.com/sdks/react-native-expo/quick-start) **2.1.0** on **Expo SDK 57** (React Native 0.86). The YouVersion packages are `@youversion/platform-react-native-expo-ui` and `@youversion/platform-react-native-expo-core`. Bible text is loaded from YouVersion. The app needs a network connection and a YouVersion App Key. It does not ship a bundled Bible, and it does not include its own search index.
 
 Reading works without an account. Sign-in with YouVersion is optional. The SDK is set up to start a PKCE flow whose redirect is `simplebible://callback`, as described in the [authentication guide](https://developers.youversion.com/sdks/react-native-expo/authentication). This app does not have a callback screen yet, so a finished sign-in can open an unmatched route. [docs/RELEASE.md](docs/RELEASE.md) covers that gap.
 
@@ -9,7 +9,7 @@ The SDK uses native modules. It does not run in Expo Go. Use a [development buil
 ## What you can do in the app
 
 - Home shows the YouVersion verse of the day, your last reading position, and verses you saved.
-- Read opens the YouVersion reader, including chapter and version pickers.
+- Read uses the SDK `BibleReader`, including chapter and version pickers.
 - Settings changes the theme and signs you in or out of YouVersion.
 - Share uses the device share sheet.
 
@@ -17,7 +17,7 @@ The SDK uses native modules. It does not run in Expo Go. Use a [development buil
 
 ## Setup
 
-Requirements: Node.js 22, npm, and an Expo account. iOS device builds need a Mac or EAS. Android device builds need the Android SDK or EAS.
+Requirements: Node.js 22, npm, Expo SDK 57, and an Expo account. iOS device builds need a Mac or EAS. Android device builds need the Android SDK or EAS. An existing Expo SDK 56 dev client will not run this app. Install a new development build after pulling.
 
 ```bash
 npm install
