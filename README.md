@@ -2,7 +2,7 @@
 
 Simple Bible is a production showcase of the [YouVersion React Native (Expo) SDK](https://developers.youversion.com/sdks/react-native-expo/quick-start). Bible text is loaded from YouVersion. The app needs a network connection and a YouVersion App Key. It does not ship a bundled Bible, and it does not include its own search index.
 
-Reading works without an account. Sign-in with YouVersion is optional. Sign-in uses the SDK's PKCE flow and returns to this app through a custom URL scheme. Setup for that flow is in the [authentication guide](https://developers.youversion.com/sdks/react-native-expo/authentication).
+Reading works without an account. Sign-in with YouVersion is optional. The SDK is set up to start a PKCE flow whose redirect is `simplebible://callback`, as described in the [authentication guide](https://developers.youversion.com/sdks/react-native-expo/authentication). This app does not have a callback screen yet, so a finished sign-in can open an unmatched route. [docs/RELEASE.md](docs/RELEASE.md) covers that gap.
 
 The SDK uses native modules. It does not run in Expo Go. Use a [development build](https://docs.expo.dev/develop/development-builds/introduction/).
 
@@ -38,7 +38,7 @@ In the YouVersion Platform console, register this callback URI for that key:
 simplebible://callback
 ```
 
-That value is `AUTH_REDIRECT_URI` in `src/lib/youversion.ts`. It must match the `scheme` in `app.json` (`simplebible`) plus `://callback`. Sign-in fails when they differ, or when the console does not list that exact URI.
+That value is `AUTH_REDIRECT_URI` in `src/lib/youversion.ts`. It must match the `scheme` in `app.json` (`simplebible`) plus `://callback`. Register it in the YouVersion console. The app still has no screen at that path, so the redirect is configured and the return trip is not finished. See [docs/RELEASE.md](docs/RELEASE.md).
 
 ## Run
 
@@ -92,7 +92,7 @@ npm install --global eas-cli
 eas login
 ```
 
-The App Key has to be present when EAS bundles the app. Create it in each EAS environment. Use visibility `sensitive`. Do not use `secret`, because secret values are not inlined into the client.
+The App Key has to be present when EAS bundles the app. Create it in each EAS environment with visibility `sensitive`. A `secret` value is available on the EAS Build worker, so a production build can inline it. You cannot pull a secret down with `eas env:pull`, and on SDK 55 and later you cannot use a secret when bundling JavaScript for `eas update`. `sensitive` is the visibility that works for local development, store builds, and updates. The key is still embedded in the app either way.
 
 ```bash
 eas env:set --name EXPO_PUBLIC_YOUVERSION_APP_KEY --value YOUR_KEY --environment development --visibility sensitive

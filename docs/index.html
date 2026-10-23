@@ -73,8 +73,12 @@
     <h2>Data sent off your device</h2>
     <ul>
       <li>Passage requests go to YouVersion at api.youversion.com. They include this app's
-      YouVersion App Key and an installation id created on the device. That id identifies
-      the installation. It is not your name or email.</li>
+      YouVersion App Key and a device identifier: Identifier for Vendor (IDFV) on iOS, or
+      Android ID on Android. The YouVersion SDK sends that value as
+      <code>X-YVP-Installation-Id</code>. Scripture requests send it even when you are
+      signed out. If you sign in, the same identifier is sent on the token request, so
+      YouVersion can tie it to your account. It is not the advertising ID, and it is not
+      your name or email.</li>
       <li>If you sign in, you use YouVersion's sign-in page. YouVersion receives that
       sign-in. The app asks only for the profile and email scopes, so it can show your
       name and avatar. We never receive your YouVersion password.</li>

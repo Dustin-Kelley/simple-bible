@@ -6,7 +6,7 @@ Read [README.md](../README.md) for day-to-day setup. YouVersion's own steps are 
 
 ## Before you archive a build
 
-1. Confirm `EXPO_PUBLIC_YOUVERSION_APP_KEY` is set in the EAS `production` environment (and in `preview` / `development` if you build those). Visibility must be `sensitive` or plaintext, not `secret`.
+1. Confirm `EXPO_PUBLIC_YOUVERSION_APP_KEY` is set in the EAS `production` environment (and in `preview` / `development` if you build those). Use visibility `sensitive` or plaintext. A `secret` value is available on the EAS Build worker, so a build can inline it, but you cannot pull a secret locally and you cannot use one to bundle JavaScript for `eas update` on this SDK.
 
    ```bash
    eas env:set --name EXPO_PUBLIC_YOUVERSION_APP_KEY --value YOUR_KEY --environment production --visibility sensitive
@@ -93,7 +93,7 @@ Both stores will reject the binary until the listing exists.
 - App privacy (Apple) and Data safety (Play). Match the answers to `ios.privacyManifests` in `app.json` and to the privacy page:
   - Not used for tracking. No advertising ID.
   - If the person signs in: name, email address, and YouVersion user id, linked to that account, used for app functionality.
-  - An installation id (device id) sent to YouVersion with scripture requests, not used for tracking. The manifest marks it as not linked to the user's identity. Confirm that with YouVersion before you submit. If their API ties the installation id to the signed-in account, mark it linked in both the manifest and the store form.
+  - Device ID, linked to the user, used for app functionality, not for tracking. On iOS this is the Identifier for Vendor (IDFV). On Android it is the Android ID. The SDK sends it as `X-YVP-Installation-Id` on scripture requests and on token requests, including after sign-in. It is not the advertising ID. The privacy manifest marks Device ID as linked. Match the store forms to that.
   - Data is sent over HTTPS to YouVersion (`api.youversion.com`) and, at launch, to Expo's update service.
   - No camera, microphone, location, contacts, or photo-library prompts. Android blocks those permissions, plus storage permissions and the advertising ID, so a library cannot add them quietly.
 - Data deletion. Deleting the app removes on-device reading data and tokens. A YouVersion account is deleted through YouVersion, not through this app. Point Play's deletion link at the privacy page section that says this.
