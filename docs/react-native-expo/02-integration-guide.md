@@ -57,24 +57,26 @@ npx expo install \
   expo-build-properties
 ```
 
-MMKV-backed storage (core) also needs native modules:
+MMKV-backed storage (core) also needs native modules. `react-native-worklets`
+is required too: the UI package peers it at `>=0.9.1`, and Reanimated 4 uses it.
+This app installs `0.10.1`.
 
 ```bash
-npx expo install react-native-mmkv react-native-nitro-modules
+npx expo install react-native-mmkv react-native-nitro-modules react-native-worklets
 ```
 
-Optional, only if you opt out of the default DOM webview or use worklets:
+Optional, only if you opt out of the default DOM webview:
 
 ```bash
-npx expo install react-native-webview react-native-worklets
+npx expo install react-native-webview
 ```
 
 > Use `npx expo install` (not `npm add`) so versions are pinned to Expo 57.
 > `react-native-reanimated` is an exception: the UI package requires `>=4.5.3`,
 > and Expo SDK 57 bundles `4.5.1`. This app pins `4.5.5` and lists it in
 > `expo.install.exclude`.
-> `react-native-reanimated` is already wired in `babel.config.js`; if you add
-> `react-native-worklets`, follow its Babel-plugin note. After adding native
+> `react-native-reanimated` is already wired in `babel.config.js`, and
+> `react-native-worklets` ships with that setup. After adding native
 > modules, rebuild the dev client (`npx expo run:ios` / `run:android` or an EAS
 > dev build) — a JS reload is not enough.
 

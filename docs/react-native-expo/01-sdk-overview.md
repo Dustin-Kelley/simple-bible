@@ -66,8 +66,8 @@ Implications to keep in mind:
 ### `@youversion/platform-react-native-expo-ui@2.1.0`
 
 Runtime deps: `@radix-ui/react-use-controllable-state`, `@rn-primitives/portal`,
-**`@youversion/platform-react-ui@2.2.0`**, `expo-localization`, `i18next`,
-`react-i18next`, `zustand`, and `@youversion/platform-react-native-expo-core@1.0.0`.
+**`@youversion/platform-react-ui@2.15.0`**, `expo-localization`, `i18next`,
+`react-i18next`, `zustand`, and `@youversion/platform-react-native-expo-core@2.1.0`.
 
 Peer deps (installed in the app). The "Simple Bible" column shows current state
 (checked against `package.json` on 2026-07-17):
@@ -405,6 +405,6 @@ both authed and non-authed states.
   and the format (the quick start links a "copyright attribution requirements"
   page; confirm per version id we ship).
 - The full set of **web props** inherited by `BibleCard` / `BibleTextView` /
-  `VerseOfTheDay` — these come from `@youversion/platform-react-ui@2.2.0`; the
+  `VerseOfTheDay` — these come from `@youversion/platform-react-ui@2.15.0`; the
   exhaustive prop list is in that package's published types
   (`node_modules/@youversion/platform-react-ui` once installed).

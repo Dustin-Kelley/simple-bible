@@ -17,7 +17,7 @@ The SDK uses native modules. It does not run in Expo Go. Use a [development buil
 
 ## Setup
 
-Requirements: Node.js 22, npm, Expo SDK 57, and an Expo account. iOS device builds need a Mac or EAS. Android device builds need the Android SDK or EAS. An existing Expo SDK 56 dev client will not run this app. Install a new development build after pulling.
+Requirements: Node.js 22.13+, npm, Expo SDK 57, and an Expo account. iOS device builds need a Mac or EAS. Android device builds need the Android SDK or EAS. An existing Expo SDK 56 dev client will not run this app. Install a new development build after pulling.
 
 ```bash
 npm install

@@ -21,8 +21,8 @@ YouVersion ships an official SDK for exactly this:
 - `@youversion/platform-react-native-expo-core@2.1.0` — installation id, PKCE
   auth, token storage
 
-Both are v1.0.0, Apache-2.0, maintained by Life.Church. The UI package is built
-on the **web** SDK's `@youversion/platform-react-ui@2.2.0`, rendered inside a
+Both are v2.1.0, Apache-2.0, maintained by Life.Church. The UI package is built
+on the **web** SDK's `@youversion/platform-react-ui@2.15.0`, rendered inside a
 WebView via [Expo DOM Components](https://docs.expo.dev/guides/dom-components/) —
 so the native and web SDKs are versioned and evolved together.
 
