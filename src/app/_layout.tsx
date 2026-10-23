@@ -2,13 +2,12 @@ import '@/global.css';
 
 import { YouVersionProvider } from '@youversion/platform-react-native-expo-ui';
 import { PortalHost } from '@rn-primitives/portal';
-import { ThemeProvider } from 'expo-router';
+import { Stack, ThemeProvider } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
 import { Text } from '@/components/ui/text';
 import { ReaderNavigationProvider } from '@/lib/reader-navigation';
 import { NAV_THEME } from '@/lib/theme';
@@ -45,7 +44,10 @@ function AppProviders({ appKey }: { appKey: string }) {
       <ThemeProvider value={NAV_THEME[colorScheme]}>
         <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
         <AnimatedSplashOverlay />
-        <AppTabs />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="callback" options={{ animation: 'none', gestureEnabled: false }} />
+        </Stack>
         <PortalHost />
       </ThemeProvider>
     </YouVersionProvider>

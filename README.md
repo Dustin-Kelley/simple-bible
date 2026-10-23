@@ -2,7 +2,7 @@
 
 Simple Bible is a production showcase of the [YouVersion React Native (Expo) SDK](https://developers.youversion.com/sdks/react-native-expo/quick-start) **2.1.0** on **Expo SDK 57** (React Native 0.86). The YouVersion packages are `@youversion/platform-react-native-expo-ui` and `@youversion/platform-react-native-expo-core`. Bible text is loaded from YouVersion. The app needs a network connection and a YouVersion App Key. It does not ship a bundled Bible, and it does not include its own search index.
 
-Reading works without an account. Sign-in with YouVersion is optional. The SDK is set up to start a PKCE flow whose redirect is `simplebible://callback`, as described in the [authentication guide](https://developers.youversion.com/sdks/react-native-expo/authentication). This app does not have a callback screen yet, so a finished sign-in can open an unmatched route. [docs/RELEASE.md](docs/RELEASE.md) covers that gap.
+Reading works without an account. Sign-in with YouVersion is optional. The SDK starts a PKCE flow whose redirect is `simplebible://callback`, as described in the [authentication guide](https://developers.youversion.com/sdks/react-native-expo/authentication). When sign-in finishes, `src/app/callback.tsx` sends you back to the Home, Read, and Settings tabs.
 
 The SDK uses native modules. It does not run in Expo Go. Use a [development build](https://docs.expo.dev/develop/development-builds/introduction/).
 
@@ -38,7 +38,7 @@ In the YouVersion Platform console, register this callback URI for that key:
 simplebible://callback
 ```
 
-That value is `AUTH_REDIRECT_URI` in `src/lib/youversion.ts`. It must match the `scheme` in `app.json` (`simplebible`) plus `://callback`. Register it in the YouVersion console. The app still has no screen at that path, so the redirect is configured and the return trip is not finished. See [docs/RELEASE.md](docs/RELEASE.md).
+That value is `AUTH_REDIRECT_URI` in `src/lib/youversion.ts`. It must match the `scheme` in `app.json` (`simplebible`) plus `://callback`. Register it in the YouVersion console. The matching screen is `src/app/callback.tsx`. It lives outside the tabs, on a root stack, and returns to the tab you left. If the app was opened from the redirect and there is nothing to go back to, it opens Home.
 
 ## Run
 
