@@ -65,6 +65,7 @@
     <h2>Data stored on your device</h2>
     <ul>
       <li>Your last reading position, verses you choose to save, and your theme</li>
+      <li>A random installation id, created once for this install and kept on the device</li>
       <li>If you sign in: access and refresh tokens in the device secure storage, plus a
       cached name, email address, and avatar so the app can show your account</li>
     </ul>
@@ -73,12 +74,11 @@
     <h2>Data sent off your device</h2>
     <ul>
       <li>Passage requests go to YouVersion at api.youversion.com. They include this app's
-      YouVersion App Key and a device identifier: Identifier for Vendor (IDFV) on iOS, or
-      Android ID on Android. The YouVersion SDK sends that value as
+      YouVersion App Key and a random installation id. The YouVersion SDK creates that id
+      once with a random UUID, stores it on the device, and sends it as
       <code>X-YVP-Installation-Id</code>. Scripture requests send it even when you are
-      signed out. If you sign in, the same identifier is sent on the token request, so
-      YouVersion can tie it to your account. It is not the advertising ID, and it is not
-      your name or email.</li>
+      signed out. If you sign in, the same id is sent on the token request, so
+      YouVersion can tie this install to your account.</li>
       <li>If you sign in, you use YouVersion's sign-in page. YouVersion receives that
       sign-in. The app asks only for the profile and email scopes, so it can show your
       name and avatar. We never receive your YouVersion password.</li>
@@ -92,9 +92,9 @@
     <p>The app does not ask for your camera, microphone, location, contacts, or photos.</p>
 
     <h2>Deleting data</h2>
-    <p>Delete the app to remove reading history, saved verses, theme, and sign-in tokens from
-    the device. To delete a YouVersion account, use YouVersion's own account tools. This app
-    cannot delete that account for you.</p>
+    <p>Delete the app to remove reading history, saved verses, theme, the installation id,
+    and sign-in tokens from the device. To delete a YouVersion account, use YouVersion's
+    own account tools. This app cannot delete that account for you.</p>
 
     <h2>Children's privacy</h2>
     <p>You can use the app without an account. We do not knowingly collect personal
