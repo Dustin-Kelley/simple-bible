@@ -12,6 +12,7 @@ import { Text } from '@/components/ui/text';
 import { ReaderNavigationProvider } from '@/lib/reader-navigation';
 import { NAV_THEME } from '@/lib/theme';
 import { AUTH_REDIRECT_URI } from '@/lib/youversion';
+import { AppleAuthProvider } from '@/providers/apple-auth';
 import {
   ThemePreferenceProvider,
   useThemePreference,
@@ -41,15 +42,17 @@ function AppProviders({ appKey }: { appKey: string }) {
           <Text className="text-muted-foreground text-sm">Loading Bible…</Text>
         </View>
       }>
-      <ThemeProvider value={NAV_THEME[colorScheme]}>
-        <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-        <AnimatedSplashOverlay />
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="callback" options={{ animation: 'none', gestureEnabled: false }} />
-        </Stack>
-        <PortalHost />
-      </ThemeProvider>
+      <AppleAuthProvider>
+        <ThemeProvider value={NAV_THEME[colorScheme]}>
+          <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+          <AnimatedSplashOverlay />
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="callback" options={{ animation: 'none', gestureEnabled: false }} />
+          </Stack>
+          <PortalHost />
+        </ThemeProvider>
+      </AppleAuthProvider>
     </YouVersionProvider>
   );
 }
