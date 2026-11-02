@@ -1,10 +1,12 @@
-import { useYVAuth } from '@youversion/platform-react-native-expo-core';
 import { YouVersionAuthButton } from '@youversion/platform-react-native-expo-ui';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AppleSignInButton } from '@/components/apple-sign-in-button';
 import { Text } from '@/components/ui/text';
+import type { AuthState } from '@/lib/auth-state';
 import type { ThemePreference } from '@/lib/store';
+import { useAuthState } from '@/providers/apple-auth';
 import { useThemePreference } from '@/providers/theme-preference';
 
 const THEME_OPTIONS: { value: ThemePreference; label: string }[] = [
@@ -22,26 +24,63 @@ function SectionLabel({ children, className }: { children: string; className?: s
   );
 }
 
+function accountTitle(state: AuthState, isLoading: boolean): string {
+  if (isLoading && state.status === 'signed-out') return 'Checking sign-in…';
+  if (state.status === 'signed-out') return 'Not signed in';
+  if (state.name) return state.name;
+  if (state.email) return state.email;
+  if (state.status === 'youversion') return 'Signed in with YouVersion';
+  return 'Signed in with Apple';
+}
+
+function accountDetail(state: AuthState): string {
+  if (state.status === 'apple') {
+    return 'Signed in with Apple on this device. Highlight sync uses a YouVersion account, not Apple.';
+  }
+  if (state.status === 'youversion') {
+    return 'Signed in with YouVersion. Highlights sync with this account.';
+  }
+  return 'Sign in with Apple or YouVersion. Highlight sync uses YouVersion. Apple sign-in stays on this device. Reading works without an account.';
+}
+
 function AccountSection() {
-  const { isAuthenticated, userInfo, isLoading } = useYVAuth();
+  const { colorScheme } = useThemePreference();
+  const { state, isLoading, appleAvailable, appleError, signInWithApple, signOutApple } =
+    useAuthState();
+  const showAppleSignIn = appleAvailable && state.status !== 'apple';
 
   return (
     <>
-      <SectionLabel className="mb-2.5 mt-7">YouVersion account</SectionLabel>
+      <SectionLabel className="mb-2.5 mt-7">Account</SectionLabel>
       <View className="bg-secondary rounded-[20px] px-4 py-[15px]">
-        <Text className="text-foreground text-base font-medium">
-          {isLoading
-            ? 'Checking sign-in…'
-            : isAuthenticated
-              ? userInfo?.name ?? userInfo?.email ?? 'Signed in'
-              : 'Not signed in'}
-        </Text>
-        <Text className="text-muted-foreground mt-1 text-[13px] leading-5">
-          Sign in to sync YouVersion features in the reader. Reading works without an account.
-        </Text>
-        <View className="mt-4 items-center">
-          <YouVersionAuthButton mode="auto" />
+        <Text className="text-foreground text-base font-medium">{accountTitle(state, isLoading)}</Text>
+        <Text className="text-muted-foreground mt-1 text-[13px] leading-5">{accountDetail(state)}</Text>
+        <View className="mt-4 w-full gap-3">
+          {showAppleSignIn ? (
+            <AppleSignInButton
+              colorScheme={colorScheme}
+              onPress={() => {
+                void signInWithApple();
+              }}
+            />
+          ) : null}
+          {state.status === 'apple' ? (
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => {
+                void signOutApple();
+              }}
+              className="border-border bg-background h-12 w-full items-center justify-center rounded-full border">
+              <Text className="text-foreground text-sm font-semibold">Sign out</Text>
+            </Pressable>
+          ) : null}
+          <View className="w-full items-stretch">
+            <YouVersionAuthButton mode="auto" />
+          </View>
         </View>
+        {appleError ? (
+          <Text className="text-destructive mt-3 text-center text-[13px] leading-5">{appleError}</Text>
+        ) : null}
       </View>
     </>
   );

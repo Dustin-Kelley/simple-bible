@@ -51,11 +51,12 @@
   <main>
     <div class="kicker">Simple Bible</div>
     <h1>Privacy Policy</h1>
-    <p class="muted">Effective October 23, 2026</p>
+    <p class="muted">Effective November 2, 2026</p>
 
     <p>Simple Bible is a Bible reading app. Scripture is loaded from the YouVersion Platform
     when you open a passage. You can read without an account. Signing in with YouVersion is
-    optional. The app does not include its own analytics or advertising.</p>
+    optional. On iPhone you can also sign in with Apple. The app does not include its own
+    analytics or advertising.</p>
 
     <h2>Who we are</h2>
     <p>Simple Bible is published by Dustin Kelley. This policy covers the app. Bible text,
@@ -66,8 +67,12 @@
     <ul>
       <li>Your last reading position, verses you choose to save, and your theme</li>
       <li>A random installation id, created once for this install and kept on the device</li>
-      <li>If you sign in: access and refresh tokens in the device secure storage, plus a
+      <li>If you sign in with YouVersion: access and refresh tokens in the device secure storage, plus a
       cached name, email address, and avatar so the app can show your account</li>
+      <li>If you sign in with Apple: the Apple user identifier, and the name and email address
+      Apple shares, in the device secure storage. Apple may share a private relay email instead
+      of your real address. Apple sends the name and email only the first time you sign in, so
+      the app keeps that copy on the device. These values are not sent to a server</li>
     </ul>
     <p>Deleting the app deletes this on-device data.</p>
 
@@ -79,9 +84,12 @@
       <code>X-YVP-Installation-Id</code>. Scripture requests send it even when you are
       signed out. If you sign in, the same id is sent on the token request, so
       YouVersion can tie this install to your account.</li>
-      <li>If you sign in, you use YouVersion's sign-in page. YouVersion receives that
+      <li>If you sign in with YouVersion, you use YouVersion's sign-in page. YouVersion receives that
       sign-in. The app asks only for the profile and email scopes, so it can show your
       name and avatar. We never receive your YouVersion password.</li>
+      <li>If you sign in with Apple, Apple handles that sign-in on the device. The app asks only
+      for your name and email. It stores the Apple user identifier, name, and email on the device
+      and does not send them to YouVersion or to a server of our own. We never receive your Apple ID password.</li>
       <li>At launch the app may contact Expo to check for an app update. That check is not
       tied to your YouVersion account.</li>
       <li>Share uses your device's share sheet. We do not receive the shared text.</li>
@@ -93,12 +101,15 @@
 
     <h2>Deleting data</h2>
     <p>Delete the app to remove reading history, saved verses, theme, the installation id,
-    and sign-in tokens from the device. To delete a YouVersion account, use YouVersion's
-    own account tools. This app cannot delete that account for you.</p>
+    sign-in tokens, and any Apple user identifier, name, and email stored on the device.
+    Sign out in Settings removes the Apple sign-in from this device as well. To delete a
+    YouVersion account, use YouVersion's own account tools. This app cannot delete that
+    account for you. Your Apple ID is managed by Apple.</p>
 
     <h2>Children's privacy</h2>
     <p>You can use the app without an account. We do not knowingly collect personal
-    information from children. YouVersion account rules are set by YouVersion.</p>
+    information from children. YouVersion account rules are set by YouVersion. Sign in
+    with Apple follows Apple's account rules.</p>
 
     <h2>Bible text</h2>
     <p>Each Bible version stays under its publisher's copyright. The reader and the verse of
