@@ -1,6 +1,5 @@
 import {
   biblePassageAnchorFromPassageId,
-  useYVAuth,
   useYouVersion,
 } from '@youversion/platform-react-native-expo-core';
 import { VerseOfTheDay } from '@youversion/platform-react-native-expo-ui';
@@ -25,7 +24,9 @@ import {
   type SavedVerse,
 } from '@/lib/store';
 import { fetchVerseOfTheDayPassageId } from '@/lib/verse-of-the-day';
+import { accountDisplayName } from '@/lib/auth-state';
 import { DEFAULT_VERSION_ID } from '@/lib/youversion';
+import { useAuthState } from '@/providers/apple-auth';
 import { useThemePreference } from '@/providers/theme-preference';
 
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -54,7 +55,7 @@ export default function HomeScreen() {
   const navigation = useReaderNavigation();
   const { appKey, apiHost, installationId } = useYouVersion();
   const { colorScheme } = useThemePreference();
-  const { isAuthenticated, userInfo } = useYVAuth();
+  const { state } = useAuthState();
   const [openingDaily, setOpeningDaily] = useState(false);
   const [dailyError, setDailyError] = useState(false);
 
@@ -65,9 +66,8 @@ export default function HomeScreen() {
   const [saved, setSaved] = useState<SavedVerse[]>([]);
 
   const now = useMemo(() => new Date(), []);
-  const firstName = isAuthenticated
-    ? userInfo?.name?.trim().split(/\s+/)[0] || null
-    : null;
+  const displayName = accountDisplayName(state)?.trim() ?? '';
+  const firstName = displayName.split(/\s+/)[0] || null;
 
   useFocusEffect(
     useCallback(() => {

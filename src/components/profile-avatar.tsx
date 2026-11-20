@@ -1,10 +1,10 @@
-import { useYVAuth } from '@youversion/platform-react-native-expo-core';
 import { Image } from 'expo-image';
 import { User } from 'lucide-react-native';
 import { Pressable, View } from 'react-native';
 
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
+import { useAuthState } from '@/providers/apple-auth';
 
 /** First letters of the first two name parts, e.g. "Sarah Bennett" -> "SB". */
 function initialsFrom(name: string | null | undefined) {
@@ -31,17 +31,26 @@ type ProfileAvatarProps = {
  * pink tile, then to a neutral glyph when signed out.
  */
 export function ProfileAvatar({ onPress, size = 48 }: ProfileAvatarProps) {
-  const { isAuthenticated, userInfo } = useYVAuth();
+  const { state } = useAuthState();
 
-  const avatarUrl = isAuthenticated ? userInfo?.avatarUrl : null;
-  const initials = isAuthenticated ? initialsFrom(userInfo?.name) : null;
+  let avatarUrl: string | null = null;
+  let name: string | null = null;
+  if (state.status === 'youversion') {
+    avatarUrl = state.avatarUrl;
+    name = state.name;
+  }
+  if (state.status === 'apple') {
+    name = state.name;
+  }
+  const initials = initialsFrom(name);
+  const signedIn = state.status !== 'signed-out';
 
   const box = { width: size, height: size, borderRadius: size / 2 };
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={isAuthenticated ? 'Open your profile' : 'Sign in'}
+      accessibilityLabel={signedIn ? 'Open your profile' : 'Sign in'}
       onPress={onPress}
       // shrink-0 so a long greeting never squashes the avatar into an oval.
       className="shrink-0 overflow-hidden"
