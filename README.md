@@ -1,6 +1,6 @@
 # Simple Bible
 
-Simple Bible is a production showcase of the [YouVersion React Native (Expo) SDK](https://developers.youversion.com/sdks/react-native-expo/quick-start) **2.1.0** on **Expo SDK 57** (React Native 0.86). The YouVersion packages are `@youversion/platform-react-native-expo-ui` and `@youversion/platform-react-native-expo-core`. Bible text is loaded from YouVersion. The app needs a network connection and a YouVersion App Key. It does not ship a bundled Bible, and it does not include its own search index.
+Simple Bible is a production showcase of the [YouVersion React Native (Expo) SDK](https://developers.youversion.com/sdks/react-native-expo/quick-start) **2.4.0** on **Expo SDK 57** (React Native 0.86). The YouVersion packages are `@youversion/platform-react-native-expo-ui` and `@youversion/platform-react-native-expo-core`. Bible text is loaded from YouVersion and drawn with native text. The app needs a network connection and a YouVersion App Key. It does not ship a bundled Bible, and it does not include its own search index.
 
 Reading works without an account. Sign-in with YouVersion is optional. The SDK starts a PKCE flow whose redirect is `simplebible://callback`, as described in the [authentication guide](https://developers.youversion.com/sdks/react-native-expo/authentication). When sign-in finishes, `src/app/callback.tsx` sends you back to the Home, Read, and Settings tabs.
 

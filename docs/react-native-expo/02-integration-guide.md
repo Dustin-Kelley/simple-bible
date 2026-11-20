@@ -2,13 +2,14 @@
 
 > How the SDK is wired in **this app** (`simple-bible`, Expo 57, expo-router,
 > NativeWind, npm). Package manager is **npm** (`package-lock.json`).
-> Packages are `@youversion/platform-react-native-expo-ui@2.1.0` and
-> `@youversion/platform-react-native-expo-core@2.1.0`.
+> Packages are `@youversion/platform-react-native-expo-ui@2.4.0` and
+> `@youversion/platform-react-native-expo-core@2.4.0`.
 
 ## Prerequisites (already satisfied)
 
-- Expo **SDK ~57.0.31**, React **19.2.3**, RN **0.86.3** — within the SDK 2.1
+- Expo **SDK ~57.0.31**, React **19.2.3**, RN **0.86.3** — within the SDK 2.4
   peer ranges. Expo `57.0.23` or newer is required for the iOS 27 scene backport.
+  `react-native-reanimated` stays at `4.5.5` (`>=4.5.3`). No new peers.
 - A **development build** via `expo-dev-client` — required (Expo Go will not
   work; the SDK uses native modules).
 - App scheme `simplebible` is configured in `app.json`.
@@ -205,15 +206,15 @@ function ProfileBadge() {
 - **Provider nesting order matters.** `GestureHandlerRootView` outside,
   `YouVersionProvider` inside. Bottom-sheet pickers won't animate/gesture
   correctly otherwise.
-- **WebView-backed components.** Each `BibleCard` / `BibleReader` / sheet hosts a
-  DOM WebView; expect slightly higher memory than pure-native views and a brief
-  first-paint. Don't mount many `BibleCard`s in a long list without
-  virtualization.
+- **Native scripture.** From UI 2.4.0, `BibleReader`, `BibleTextView`,
+  `BibleCard`, and `VerseOfTheDay` draw native text. `dom` is ignored. A
+  `BibleTextView` `reference` has to be one chapter, one verse, or a range
+  inside one chapter.
 - **Web `fetch` loop.** On web the DOM bundle and the app share one realm. The
   SDK's content-cache `fetch` wrapper then calls itself. `index.js` imports
   `src/lib/keep-web-fetch.ts` after `@expo/metro-runtime` and locks `fetch` so
-  the wrapper cannot replace it. Native is unchanged: that wrapper runs in the
-  WebView, not in the app entry.
+  the wrapper cannot replace it. UI 2.4.0 still imports that DOM module from
+  the package entry, so the lock stays. Native is unchanged.
 - **NativeWind won't style SDK components.** They're self-styled via the web SDK;
   use the components' documented props (`theme`, `backgroundColor`,
   `foregroundColor`) rather than Tailwind classes.
