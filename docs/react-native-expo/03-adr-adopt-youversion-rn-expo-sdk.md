@@ -4,7 +4,9 @@ Date: 2026-07-17
 
 ## Status
 
-Accepted. Implemented on Expo SDK 57 with YouVersion SDK 2.1.0.
+Accepted. First implemented on Expo SDK 57 with YouVersion SDK 2.1.0.
+The app now runs YouVersion SDK 2.4.0. Scripture in the reader, cards, and
+Verse of the Day is native text.
 `BibleReader` is the Read screen. Home passage jumps use
 `createBibleReaderNavigation`.
 

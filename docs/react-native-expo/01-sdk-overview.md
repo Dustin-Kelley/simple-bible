@@ -1,6 +1,6 @@
 # YouVersion RN (Expo) SDK — Overview & API Reference
 
-> Updated 2026-10-23 from the published `@2.1.0` packages, the Quick Start, and
+> Updated 2026-11-20 from the published `@2.4.0` packages, the Quick Start, and
 > the Components reference. Treat the installed `.d.ts` files as authoritative
 > when this page and the package disagree.
 
@@ -14,40 +14,45 @@ Two packages that drop YouVersion Bible content and authentication into an
 | `@youversion/platform-react-native-expo-ui` | Pre-built Bible components + the `YouVersionProvider` (theming, native sheets, auth wiring) | `@youversion/platform-react-ui` |
 | `@youversion/platform-react-native-expo-core` | Installation id, optional PKCE OAuth (`useYVAuth`), token storage | roughly `@youversion/platform-core` + auth |
 
-Both are **v2.1.0**, Apache-2.0. The UI package depends on core **2.1.0** and
-on `@youversion/platform-react-ui@2.15.0`. Scripture still renders in a WebView.
-The reader toolbar, pickers, search, and verse actions are native on iOS and
-Android. On web, `BibleReader` keeps the web SDK toolbar inside the WebView.
+Both are **v2.4.0**, Apache-2.0. The UI package depends on core **2.4.0** and
+on `@youversion/platform-react-ui@2.17.0`. From 2.4.0, `BibleReader`,
+`BibleTextView`, `BibleCard`, and `VerseOfTheDay` draw scripture with native
+text. `dom` is still accepted and ignored. The reader toolbar, pickers, search,
+and verse actions are native on iOS and Android. Web still skips some native
+chrome (verse-action sheets, the host `onShare` on Verse of the Day).
 
 ## 2. How it's built — the key architectural fact
 
-The UI components are **not** re-implemented in native React Native. They render
-YouVersion's **Web SDK inside a WebView** using
-[Expo DOM Components](https://docs.expo.dev/guides/dom-components/) (the
-`'use dom'` directive). The package's own description: *"Built on the React Web
-SDK via Expo DOM Components."*
+From **2.4.0**, scripture is native React Native text. `BibleReader`,
+`BibleTextView`, `BibleCard`, and `VerseOfTheDay` no longer paint the passage
+inside an Expo DOM WebView. `dom` remains on the prop types and is ignored.
+`highlightedVerses` is ignored; cached highlights paint the passage. A
+`BibleTextView` reference must be one chapter, one verse, or a range inside
+one chapter.
 
-Concretely, for every visible component there are two layers in the tarball:
-
-- `build/dom/*.js` — the actual web component (e.g. `dom/bible-card.js`), which
-  wraps `@youversion/platform-react-ui` and runs inside an Expo DOM WebView.
-- `build/native/*.js` — a thin React Native wrapper that owns native concerns
-  (theme resolution, `@gorhom/bottom-sheet` sheets, gesture handling, auth
-  token/installation-id injection) and passes props down through `dom` props to
-  the DOM layer.
+The package still ships `build/dom/*.js`. Importing the UI package runs
+`ensureDomContentCache()`, which assigns `globalThis.fetch`. On web that
+assignment shares the app realm, so `src/lib/keep-web-fetch.ts` still locks
+`fetch`. Native sheets, the toolbar, and verse actions stay React Native.
 
 Implications to keep in mind:
 
 - **Native modules are required** → Simple Bible's `expo-dev-client` dev build is
   mandatory; the SDK does **not** run in Expo Go.
-- Each component (and each bottom sheet) hosts a WebView. Bottom sheets are
-  real native `@gorhom/bottom-sheet` surfaces whose *content* is a DOM WebView.
-- Props that cross into the DOM layer are serialized; callbacks are async
-  (`() => Promise<void>`) because they bridge the native↔WebView boundary.
-- Styling/branding comes from the web `platform-react-ui` (CSS injected via
-  React 19 `<style precedence>`), themed light/dark by the native wrapper. Note
-  Simple Bible styles with NativeWind/Tailwind — the SDK components are
+- Bottom sheets are native `@gorhom/bottom-sheet` surfaces.
+- Callbacks that used to cross a WebView are still typed as async.
+- Simple Bible styles with NativeWind/Tailwind. The SDK components are
   self-styled and won't inherit NativeWind classes.
+
+### Since 2.1.0 (no app prop changes besides the verse-of-the-day URL)
+
+- **2.2.0** adds `useImages` and `useUnifiedSearch`. A search HTTP 404 is
+  `not-found`. This app does not call search.
+- **2.3.0** adds `useSearch().images` and `useVerseOfTheDay`. Verse of the Day
+  reads `GET /v1/verse-of-the-days` and `GET /v1/verse-of-the-days/{day}`.
+  Simple Bible's "Read this verse" fetch uses that hyphenated path.
+- **2.4.0** draws scripture natively, as described above. Peer ranges are the
+  same Expo 57 set. `react-native-reanimated` stays `>=4.5.3`.
 
 ## 3. Requirements
 
@@ -63,11 +68,11 @@ Implications to keep in mind:
 
 ## 4. Packages, dependencies, peers
 
-### `@youversion/platform-react-native-expo-ui@2.1.0`
+### `@youversion/platform-react-native-expo-ui@2.4.0`
 
-Runtime deps: `@radix-ui/react-use-controllable-state`, `@rn-primitives/portal`,
-**`@youversion/platform-react-ui@2.15.0`**, `expo-localization`, `i18next`,
-`react-i18next`, `zustand`, and `@youversion/platform-react-native-expo-core@2.1.0`.
+Runtime deps include `@youversion/platform-react-ui@2.17.0`,
+`@youversion/platform-core@2.17.0`, `zod@4.1.12`, and
+`@youversion/platform-react-native-expo-core@2.4.0`.
 
 Peer deps (installed in the app). The "Simple Bible" column shows current state
 (checked against `package.json` on 2026-07-17):
@@ -90,9 +95,11 @@ Peer deps (installed in the app). The "Simple Bible" column shows current state
 | `react-native-webview` | `>=13.13.0` | optional |
 | `react-native-worklets` | `>=0.9.1` | ✅ `0.10.1` |
 
-### `@youversion/platform-react-native-expo-core@2.1.0`
+### `@youversion/platform-react-native-expo-core@2.4.0`
 
-Runtime deps: `zod@4.4.3`.
+Runtime deps: `@youversion/platform-core@2.17.0`, `zod@4.1.12`.
+Also exports `./api-client` and `./default-api-host`. This app does not import
+those. `./sdk-version` is unchanged.
 
 | Peer | Range | Simple Bible |
 | --- | --- | --- |
@@ -405,6 +412,6 @@ both authed and non-authed states.
   and the format (the quick start links a "copyright attribution requirements"
   page; confirm per version id we ship).
 - The full set of **web props** inherited by `BibleCard` / `BibleTextView` /
-  `VerseOfTheDay` — these come from `@youversion/platform-react-ui@2.15.0`; the
+  `VerseOfTheDay` — these come from `@youversion/platform-react-ui@2.17.0`; the
   exhaustive prop list is in that package's published types
   (`node_modules/@youversion/platform-react-ui` once installed).

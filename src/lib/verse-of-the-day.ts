@@ -17,7 +17,8 @@ type VerseOfTheDayCredentials = {
 
 /**
  * Passage id for today's verse, such as `JHN.3.16`.
- * Uses the same path as `@youversion/platform-core` `getVOTD`.
+ * Same route as `@youversion/platform-core` `getVOTD`:
+ * `GET /v1/verse-of-the-days/{day}`.
  */
 export async function fetchVerseOfTheDayPassageId(
   credentials: VerseOfTheDayCredentials,
@@ -26,7 +27,7 @@ export async function fetchVerseOfTheDayPassageId(
   const host = credentials.apiHost || 'api.youversion.com';
 
   try {
-    const response = await fetch(`https://${host}/v1/verse_of_the_days/${day}`, {
+    const response = await fetch(`https://${host}/v1/verse-of-the-days/${day}`, {
       headers: {
         'X-YVP-App-Key': credentials.appKey,
         'X-YVP-Installation-Id': credentials.installationId,

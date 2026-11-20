@@ -163,8 +163,7 @@ export default function HomeScreen() {
           <ProfileAvatar onPress={() => router.navigate('/settings')} />
         </View>
 
-        {/* Radius matches the SDK card's own `rounded-2xl` so no DOM-body
-            background bleeds through the corners once the card is inverted. */}
+        {/* Clip to the SDK card radius so the inverted card stays one shape. */}
         <View className="mt-6 overflow-hidden rounded-2xl">
           <VerseOfTheDay
             versionId={DEFAULT_VERSION_ID}
